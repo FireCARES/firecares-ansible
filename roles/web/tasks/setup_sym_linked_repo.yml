@@ -1,0 +1,14 @@
+---
+
+- name: Remove potentially old git repo
+  file: dest={{ project_path }} state=absent
+  when: sym_link_repo is defined and sym_link_repo and not setup_git_repo
+
+- name: Setup the symlinked repo
+  file: src={{ project_source }} dest={{ project_path }} state=link
+  when: sym_link_repo is defined and sym_link_repo and not setup_git_repo
+
+- name: Delete all .pyc files
+  command: find . -name '*.pyc' -delete
+  args:
+    chdir: "{{ project_path }}"

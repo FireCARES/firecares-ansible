@@ -1,0 +1,62 @@
+---
+
+- name: Install packages required by the Django app inside virtualenv
+  pip: virtualenv={{ virtualenv_path }} requirements={{ requirements_file }}
+
+- name: Run the Django syncdb command
+  django_manage:
+    command: syncdb
+    app_path: "{{ project_path }}"
+    virtualenv: "{{ virtualenv_path }}"
+    settings: "{{ django_settings_file }}"
+  environment: django_environment
+  when: run_django_syncdb is defined and run_django_sync_db
+  tags: django.syncdb
+
+- name: Run Django database migrations
+  django_manage:
+    command: migrate
+    app_path: "{{ project_path }}"
+    virtualenv: "{{ virtualenv_path }}"
+    settings: "{{ django_settings_file }}"
+  environment: django_environment
+  when: run_django_db_migrations is defined and run_django_db_migrations
+  tags: django.migrate
+
+- name: Run Django collectstatic
+  django_manage:
+    command: collectstatic
+    app_path: "{{ project_path }}"
+    virtualenv: "{{ virtualenv_path }}"
+    settings: "{{ django_settings_file }}"
+  environment: django_environment
+  when: run_django_collectstatic is defined and run_django_collectstatic
+  tags: django.collectstatic
+
+- name: download fixtures
+  get_url: url=https://s3.amazonaws.com/firecares-share/fixtures/firecares_fixtures.sql.gz dest=/tmp/firecares_fixtures.sql.gz
+  register: download_fixtures
+  when: db_created.changed
+
+- stat: path=/tmp/firecares_fixtures.sql.gz
+  register: p
+
+- name: extract fixtures
+  command: gunzip firecares_fixtures.sql.gz chdir=/tmp
+  when: p.stat.exists is defined and p.stat.exists
+
+- stat: path=/tmp/firecares_fixtures.sql
+  register: fixtures_sql
+
+- name: load fixtures
+  command: psql -d {{ db_name }} -f /tmp/firecares_fixtures.sql chdir=/tmp
+  when: fixtures_sql.stat.exists is defined and fixtures_sql.stat.exists
+  sudo_user: postgres
+
+- name: remove fixtures
+  file: path=/tmp/firecares_fixtures.sql.gz state=absent
+  when: p.stat.exists is defined and p.stat.exists
+
+- name: remove fixtures
+  file: path=/tmp/firecares_fixtures.sql state=absent
+  when: fixtures_sql.stat.exists is defined and fixtures_sql.stat.exists
