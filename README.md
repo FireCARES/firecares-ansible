@@ -17,8 +17,6 @@ Default settings are stored in ```roles/role_name/vars/main.yml```.  Environment
 
 **Tested with OS:** Ubuntu 14.04 LTS x64
 
-**Tested with Cloud Providers:** [Digital Ocean](https://www.digitalocean.com/?refcode=5aa134a379d7), [Amazon](https://aws.amazon.com), [Rackspace](http://www.rackspace.com/)
-
 ## Getting Started
 
 A quick way to get started is with Vagrant and VirtualBox.
@@ -30,6 +28,9 @@ A quick way to get started is with Vagrant and VirtualBox.
 - [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 
 ```
+git clone https://github.com/FireCARES/firecares-ansible.git
+git clone https://github.com/FireCARES/firecares.git
+cd firecares-ansible
 vagrant up
 ```
 
