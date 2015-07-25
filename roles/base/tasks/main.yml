@@ -35,3 +35,6 @@
 - name: Install virtualenv
   pip: name=virtualenv
   tags: packages
+
+- name: copy esri extras
+  copy: src=files/esri_extra.wkt dest=/usr/share/gdal/1.10 mode=0644
