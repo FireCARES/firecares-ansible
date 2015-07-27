@@ -67,3 +67,7 @@ ssl_key: |
   GhN+yDgmf5OjDia0mFhv1nA/Nh16rQZd2NV7qYx0npPabOfud/8imdgOFr78HCjS
   MoqV6aeRY/7uwLiviaIUJg==
   -----END PRIVATE KEY-----
+
+#aws_storage_bucket_name: ''
+#aws_access_key_id: ''
+#aws_secret_access_key: ''
