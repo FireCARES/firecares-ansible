@@ -108,10 +108,16 @@ If you're testing with vagrant, you can use this command:
 ansible-playbook -i vagrant_ansible_inventory_default --private-key=~/.vagrant.d/insecure_private_key vagrant.yml
 ```
 
+## Activating the virtual environment from vagrant
+```
+vagrant ssh
+sudo su firecares
+workon firecares
+```
+
 ## Useful Links
 
 - [Ansible - Getting Started](http://docs.ansible.com/intro_getting_started.html)
 - [Ansible - Best Practices](http://docs.ansible.com/playbooks_best_practices.html)
 - [Setting up Django with Nginx, Gunicorn, virtualenv, supervisor and PostgreSQL](http://michal.karzynski.pl/blog/2013/06/09/django-nginx-gunicorn-virtualenv-supervisor/)
 - [How to deploy encrypted copies of your SSL keys and other files with Ansible and OpenSSL](http://www.calazan.com/how-to-deploy-encrypted-copies-of-your-ssl-keys-and-other-files-with-ansible-and-openssl/)
-

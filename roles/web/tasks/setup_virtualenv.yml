@@ -47,3 +47,9 @@
   template: src=maintenance_off.html
             dest={{ virtualenv_path }}/maintenance_off.html
             mode=0664
+
+- name: add workon home to user profile
+  lineinfile: dest=/home/{{gunicorn_user}}/.bashrc line="export WORKON_HOME={{ server_root_dir }}" state=present
+
+- name: add source line to user profile
+  lineinfile: dest=/home/{{gunicorn_user}}/.bashrc line="source /usr/local/bin/virtualenvwrapper.sh" state=present
