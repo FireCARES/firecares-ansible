@@ -71,3 +71,4 @@ ssl_key: |
 #aws_storage_bucket_name: ''
 #aws_access_key_id: ''
 #aws_secret_access_key: ''
+#mapbox_access_token: ''
