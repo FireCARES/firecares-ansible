@@ -14,8 +14,8 @@
 
   roles:
     - base
+    - memcached
     - db
     - rabbitmq
     - web
     - celery
-    - memcached
