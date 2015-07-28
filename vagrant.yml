@@ -18,3 +18,4 @@
     - rabbitmq
     - web
     - celery
+    - memcached

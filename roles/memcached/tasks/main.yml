@@ -4,6 +4,10 @@
   apt: name=memcached update_cache={{ update_apt_cache }} state=installed
   tags: packages
 
+- name: Install Python Memcached
+  apt: name=python-memcache update_cache={{ update_apt_cache }} state=installed
+  tags: packages
+
 - name: Create the Memcached configuration file
   template: src=memcached.conf.j2
             dest=/etc/memcached.conf
@@ -14,3 +18,10 @@
 
 - name: Ensure the Memcached service is running
   service: name=memcached state=started enabled=yes
+
+- stat: path={{ virtualenv_path }}/lib/python2.7/site-packages/
+  register: memcache_symlink_path
+
+- name: Symlink the memcache binding
+  file: src=/usr/lib/python2.7/dist-packages/memcache.py dest={{ virtualenv_path }}/lib/python2.7/site-packages/memcache.py state=link
+  when: memcache_symlink_path.stat.isdir is defined and memcache_symlink_path.stat.isdir
