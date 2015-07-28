@@ -34,7 +34,7 @@
   tags: django.collectstatic
 
 - name: download fixtures
-  get_url: url=https://s3.amazonaws.com/firecares-share/fixtures/firecares_fixtures.sql.gz dest=/tmp/firecares_fixtures.sql.gz
+  get_url: url=https://s3.amazonaws.com/firecares-share/fixtures/firecares_fixtures.sql.gz dest=/tmp/firecares_fixtures.sql.gz timeout=30
   register: download_fixtures
   when: db_created.changed
 
