@@ -3,6 +3,10 @@
 - name: Install packages required by the Django app inside virtualenv
   pip: virtualenv={{ virtualenv_path }} requirements={{ requirements_file }}
 
+- name: write local settings
+  template: src=local_settings.py.j2 dest={{virtualenv_path}}/firecares/firecares/settings/local_settings.py owner={{gunicorn_user}} group={{gunicorn_user}} mode=0740
+
+
 - name: Run the Django syncdb command
   django_manage:
     command: syncdb

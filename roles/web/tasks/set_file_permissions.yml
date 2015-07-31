@@ -7,3 +7,10 @@
         group={{ gunicorn_group }}
         state=directory
   notify: restart application
+
+- name: Ensure that the static file permissions are set properly
+  file: path={{ nginx_static_dir }}
+        recurse=yes
+        owner={{ gunicorn_user }}
+        group={{ gunicorn_group }}
+        state=directory
