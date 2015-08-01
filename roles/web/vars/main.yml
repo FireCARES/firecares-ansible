@@ -38,3 +38,4 @@ django_environment:
   AWS_ACCESS_KEY_ID: "{{ aws_access_key_id|default(omit) }}"
   AWS_SECRET_ACCESS_KEY: "{{ aws_secret_access_key|default(omit) }}"
   MAPBOX_ACCESS_TOKEN: "{{ mapbox_access_token|default(omit) }}"
+  GOOGLE_ANALYTICS_TRACKING_ID: "{{ google_analytics_tracking_id|default(omit) }}"
