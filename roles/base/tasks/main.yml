@@ -30,6 +30,9 @@
     - libproj-dev
     - gdal-bin
     - python-gdal
+    - libpng-dev
+    - libfreetype6-dev
+    - pkg-config
   tags: packages
 
 - name: Install virtualenv
