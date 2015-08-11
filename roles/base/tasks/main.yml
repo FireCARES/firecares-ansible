@@ -33,6 +33,8 @@
     - libpng-dev
     - libfreetype6-dev
     - pkg-config
+    - libjpeg62
+    - libjpeg62-dev
   tags: packages
 
 - name: Install virtualenv
