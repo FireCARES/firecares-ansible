@@ -40,7 +40,7 @@
 - name: download fixtures
   get_url: url=https://s3.amazonaws.com/firecares-share/fixtures/firecares_fixtures.sql.gz dest=/tmp/firecares_fixtures.sql.gz timeout=30
   register: download_fixtures
-  when: db_created.changed
+  when: db_created is defined and db_created.changed
 
 - stat: path=/tmp/firecares_fixtures.sql.gz
   register: p
