@@ -64,3 +64,15 @@
 - name: remove fixtures
   file: path=/tmp/firecares_fixtures.sql state=absent
   when: fixtures_sql.stat.exists is defined and fixtures_sql.stat.exists
+
+- name: create users
+  django_manage:
+    command: "add_user --username {{item.key}} --password {{ item.value.password }} --email {{ item.value.email }} --is_staff {{ item.value.is_staff|default(False) }} --is_superuser {{ item.value.is_superuser|default(False) }} --is_active {{ item.value.is_active|default(True) }}"
+    app_path: "{{ project_path }}"
+    virtualenv: "{{ virtualenv_path }}"
+    settings: "{{ django_settings_file }}"
+  environment: django_environment
+  with_dict: "{{ firecares_users }}"
+  when: firecares_users is defined and add_firecares_users
+  tags: django.add_user
+

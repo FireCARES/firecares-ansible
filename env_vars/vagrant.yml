@@ -55,3 +55,13 @@ broker_url: "amqp://{{ rabbitmq_application_user }}:{{ rabbitmq_application_pass
 
 run_django_db_migrations: yes
 run_django_collectstatic: yes
+
+add_firecares_users: yes
+
+firecares_users:
+  admin:
+    password: 'admin'
+    is_superuser: True
+    is_staff: True
+    email: admin@firecares.org
+'
