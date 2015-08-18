@@ -57,7 +57,7 @@ run_django_db_migrations: yes
 run_django_collectstatic: yes
 
 add_firecares_users: yes
-
+registration_open: True
 firecares_users:
   admin:
     password: 'admin'

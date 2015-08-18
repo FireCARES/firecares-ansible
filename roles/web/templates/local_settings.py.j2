@@ -1,2 +1,3 @@
 ALLOWED_HOSTS = {{ django_allowed_hosts|default([]) }}
 ADMINS = {{ django_admins|default(()) }}
+REGISTRATION_OPEN = {{ registration_open|default(False) }}
