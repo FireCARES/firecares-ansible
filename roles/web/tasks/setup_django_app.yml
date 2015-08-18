@@ -72,7 +72,7 @@
     virtualenv: "{{ virtualenv_path }}"
     settings: "{{ django_settings_file }}"
   environment: django_environment
-  with_dict: "{{ firecares_users }}"
   when: firecares_users is defined and add_firecares_users
+  with_dict: "{{ firecares_users|default({}) }}"
   tags: django.add_user
 
