@@ -58,6 +58,18 @@ run_django_collectstatic: yes
 
 add_firecares_users: yes
 registration_open: True
+database_name: firecares
+database_user: firecares
+database_password: password
+database_host: localhost
+database_port: 5432
+nfirs_database_name: nfirs
+nfirs_database_user: firecares
+nfirs_database_password: password
+nfirs_database_host: localhost
+nfirs_database_port: 5432
+memcache_location: '127.0.0.1:11211'
+
 firecares_users:
   admin:
     password: 'admin'
