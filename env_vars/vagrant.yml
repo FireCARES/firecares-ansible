@@ -70,6 +70,14 @@ nfirs_database_host: localhost
 nfirs_database_port: 5432
 memcache_location: '127.0.0.1:11211'
 
+email_host: 'localhost'
+email_host_password: ''
+email_host_user: ''
+email_port: 25
+server_email: root@localhost
+default_from_email: webmaster@localhost
+
+
 firecares_users:
   admin:
     password: 'admin'
