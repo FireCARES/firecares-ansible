@@ -1,0 +1,7 @@
+[program:ipython_notebook]
+command = {{ virtualenv_path }}/bin/ipython_notebook_start
+user = {{ gunicorn_user }}
+stdout_logfile = {{ application_log_dir }}/ipython_notebook.log
+redirect_stderr = true
+
+

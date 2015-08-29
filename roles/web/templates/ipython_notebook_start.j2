@@ -1,0 +1,12 @@
+#!/bin/sh
+
+DJANGODIR="{{ project_path }}"
+
+# Activate the virtual environment.
+cd $DJANGODIR
+. {{ virtualenv_path }}/bin/activate
+
+# Set additional environment variables.
+. {{ virtualenv_path }}/bin/postactivate
+
+ipython notebook --ip='*'

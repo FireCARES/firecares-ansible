@@ -1,0 +1,27 @@
+- name: Add ipython script file
+  template: src=ipython_notebook_start.j2
+            dest={{ virtualenv_path }}/bin/ipython_notebook_start
+            owner={{ gunicorn_user }}
+            group={{ gunicorn_group }}
+            mode=0755
+            backup=no
+  tags: ipython_notebook
+  when: ipython_notebook is defined and ipython_notebook
+
+- name: Create the Supervisor config file
+  template: src=supervisor_ipython_notebook.j2
+            dest=/etc/supervisor/conf.d/ipython_notebook.conf
+            backup=no
+  tags: ipython_notebook
+  when: ipython_notebook is defined and ipython_notebook
+
+- name: Re-read the Supervisor config files
+  supervisorctl: name=ipython_notebook state=present
+  tags: ipython_notebook
+  when: ipython_notebook is defined and ipython_notebook
+
+- name: Restart Supervisor
+  supervisorctl: name=ipython_notebook state=restarted
+  tags: ipython_notebook
+  when: ipython_notebook is defined and ipython_notebook
+
