@@ -17,6 +17,12 @@ server {
     access_log {{ nginx_access_log_file }};
     error_log {{ nginx_error_log_file }};
 
+    # special route for the load balancer
+    location /elb-status {
+        access_log off;
+        return 200;
+    }
+
     location /static/ {
         alias   {{ nginx_static_dir }};
     }
@@ -29,6 +35,13 @@ server {
         if (-f {{ virtualenv_path }}/maintenance_on.html) {
             return 503;
         }
+
+        {% if django_allowed_hosts is defined %}
+        ## Deny illegal Host headers
+        if ($host !~* ^({{django_allowed_hosts|join('|')}})$ ) {
+            return 444;
+        }
+        {% endif %}
 
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header Host $http_host;
