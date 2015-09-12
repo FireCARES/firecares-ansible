@@ -67,7 +67,7 @@
 
 - name: create users
   django_manage:
-    command: "add_user --username {{item.key}} --password {{ item.value.password }} --email {{ item.value.email }} --is_staff {{ item.value.is_staff|default(False) }} --is_superuser {{ item.value.is_superuser|default(False) }} --is_active {{ item.value.is_active|default(True) }}"
+    command: "add_user {{item.key}} {{ item.value.password }} {{ item.value.email }}{% if item.value.is_staff|default(False) %} --staff{% endif %}{% if item.value.is_superuser|default(False) %} --superuser {% endif %} {% if item.value.inactive|default(False) %} --inactive{% endif %}"
     app_path: "{{ project_path }}"
     virtualenv: "{{ virtualenv_path }}"
     settings: "{{ django_settings_file }}"
