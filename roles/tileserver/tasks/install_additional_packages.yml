@@ -1,0 +1,40 @@
+---
+
+
+- name: test
+  shell: sudo apt-get update
+
+- name: Install base packages
+  apt: name={{ item }} update_cache={{ update_apt_cache }} force=yes state=installed
+  with_items:
+    - python-software-properties
+    - postgresql-client
+    - nodejs-legacy
+    - npm
+  tags: packages
+
+- name: intall boto
+  pip: name=boto
+  tags: packages
+
+- npm: name={{item}} global=yes
+  with_items:
+    - https://github.com/garnertb/tessera/archive/firecares.tar.gz
+    - tilelive-mapnik
+    - tilelive-mapbox
+    - tilelive-vector
+    - tilelive-tmstyle
+    - mojodna/tilelive-merge
+    - mbtiles
+
+- name: Install virtualenv
+  pip: name=virtualenv
+  tags: packages
+
+- name: update ntp
+  lineinfile: dest=/etc/ntp.conf regexp='^server {{item}}.ubuntu.pool.ntp.org' line='server {{item}}.amazon.pool.ntp.org iburst'
+  with_items:
+    - 0
+    - 1
+    - 2
+    - 3

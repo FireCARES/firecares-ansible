@@ -1,0 +1,37 @@
+
+- name: Install packages required by the Django app inside virtualenv
+  pip: virtualenv={{ virtualenv_path }} name=eventlet
+
+- name: Create the application log folder
+  file: path={{ application_log_dir }}
+        owner={{ gunicorn_user }}
+        group={{ gunicorn_group }}
+        mode=0774
+        state=directory
+
+- name: Create the virtualenv postactivate script to set environment variables
+  template: src=virtualenv_postactivate.j2
+            dest={{ virtualenv_path }}/bin/postactivate
+            owner={{ gunicorn_user }}
+            group={{ gunicorn_group }}
+            mode=0640
+            backup=yes
+  tags: deploy
+
+- name: Create the application log file
+  command: touch {{ application_log_file }}
+           creates={{ application_log_file }}
+
+
+- name: Set permission to the application log file
+  file: path={{ application_log_file }}
+        owner={{ gunicorn_user }}
+        group={{ gunicorn_group }}
+        mode=0664
+        state=file
+
+- name: add workon home to user profile
+  lineinfile: dest=/home/{{gunicorn_user}}/.bashrc line="export WORKON_HOME={{ server_root_dir }}" state=present
+
+- name: add source line to user profile
+  lineinfile: dest=/home/{{gunicorn_user}}/.bashrc line="source /usr/local/bin/virtualenvwrapper.sh" state=present

@@ -9,6 +9,8 @@ postgresql_version: "9.3"
 postgis_version: "2.1"
 postgis_package_version: "2.1.*.pgdg14.04+1"
 
+tiles: ["firecares_addresses.mbtiles", "firecares_stations_districts.mbtiles"]
+
 ssl_dest_dir: /etc/ssl
 
 ssl_crt: |

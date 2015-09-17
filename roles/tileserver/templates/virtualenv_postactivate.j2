@@ -1,0 +1,7 @@
+#!/bin/sh
+
+{% if tileserver_environment %}
+{% for variable_name, value in tileserver_environment.iteritems() %}
+export {{ variable_name }}="{{ value }}"
+{% endfor %}
+{% endif %}

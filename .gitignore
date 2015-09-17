@@ -5,3 +5,7 @@ env_vars/production.yml
 production.yml
 production-playbook.yml
 production
+*.pem
+env_vars/aws-single.yml
+aws.yml
+aws-single.yml

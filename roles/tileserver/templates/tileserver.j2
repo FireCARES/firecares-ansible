@@ -1,0 +1,39 @@
+{
+  "cache":
+  {
+    "name": "S3",
+    "bucket": "{{aws_tile_cache_bucket}}"
+
+  },
+  "layers":
+  {
+    "base":{
+      "provider":
+        {
+          "name": "proxy",
+          "url": "http://localhost:8080/{Z}/{X}/{Y}.png"
+        }
+    },
+    "base_hq":{
+      "provider":
+        {
+          "name": "proxy",
+          "url": "http://localhost:8080/{Z}/{X}/{Y}@2x.png"
+        }
+    },
+    "incidents":
+    {
+      "provider": {
+        "name": "proxy",
+        "url": "http://localhost:8080/incidents/{Z}/{X}/{Y}.png"
+        }
+    },
+    "incidents_hq":
+    {
+      "provider": {
+        "name": "proxy",
+        "url": "http://localhost:8080/incidents/{Z}/{X}/{Y}@2x.png"
+        }
+    }
+  }
+}

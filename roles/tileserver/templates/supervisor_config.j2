@@ -1,0 +1,18 @@
+[program:{{ application_name }}]
+command = {{ virtualenv_path }}/bin/gunicorn_start_tileserver
+user = {{ gunicorn_user }}
+stdout_logfile = {{ application_log_file }}
+redirect_stderr = true
+
+
+[program:{{ application_name }}-tessera]
+command={{ virtualenv_path }}/bin/start_tileserver
+user= {{ gunicorn_user }}
+stdout_logfile={{ tessera_application_log_file }}
+redirect_stderr = true
+autostart=true
+autorestart=true
+stopsignal=TERM
+stopasgroup=true
+environment=MAPBOX_ACCESS_TOKEN='{{mapbox_access_token}}',MAPNIK_FONT_PATH={{project_path}}/styles/base.tm2/fonts/open-sans
+

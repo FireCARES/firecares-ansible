@@ -1,8 +1,9 @@
 ---
 
 # Git settings.
-setup_git_repo: yes
-git_branch: devlopment
+setup_git_repo: no
+sym_link_repo: yes
+project_source: '/{{ application_name }}'
 
 
 # Database settings.
@@ -15,10 +16,6 @@ db_password: password
 # 2 x number of CPUs + 1
 gunicorn_num_workers: 3
 
-# Setting this to 1 will restart the Gunicorn process each time
-# you make a request, basically reloading the code. Very handy
-# when developing. Set to 0 for unlimited requests (default).
-gunicorn_max_requests: 0
 
 
 # Nginx settings.
