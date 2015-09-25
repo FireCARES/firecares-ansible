@@ -39,6 +39,11 @@
     - liblapack-dev
     - libatlas-base-dev
     - gfortran
+    - unattended-upgrades
+  tags: packages
+
+- name: activate unattended-upgrades
+  lineinfile: dest=/etc/apt/apt.conf.d/10periodic line='APT::Periodic::Unattended-Upgrade "1";'
   tags: packages
 
 - name: Install virtualenv
