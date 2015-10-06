@@ -46,6 +46,13 @@
   lineinfile: dest=/etc/apt/apt.conf.d/10periodic line='APT::Periodic::Unattended-Upgrade "1";'
   tags: packages
 
+- name: add 20auto-upgrades
+  lineinfile: dest=/etc/apt/apt.conf.d/20auto-upgrades create=yes line='{{item}}'
+  tags: packages
+  with_items:
+    - 'APT::Periodic::Update-Package-Lists "1";'
+    - 'APT::Periodic::Unattended-Upgrade "1";'
+
 - name: Install virtualenv
   pip: name=virtualenv
   tags: packages
