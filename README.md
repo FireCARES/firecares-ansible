@@ -115,6 +115,9 @@ sudo su firecares
 workon firecares
 ```
 
+## Debugging in Pycharm
+You can use Pycharm to put breakpoints and perform typical IDE debugging tasks. See [this documentation](https://docs.google.com/document/d/1pX_wMXvgKCkCNdno_wdsHhsXcfiiPW8NOZaM_H-FAno/) for instructions
+
 ## Useful Links
 
 - [Ansible - Getting Started](http://docs.ansible.com/intro_getting_started.html)
