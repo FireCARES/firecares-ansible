@@ -7,6 +7,8 @@ application_log_dir: "{{ virtualenv_path }}/logs"
 application_log_file: "{{ application_log_dir }}/tileserver.log"
 tessera_application_log_file: "{{ application_log_dir }}/tileserver_tessera.log"
 
+git_repo: https://github.com/FireCARES/tileserver
+
 # Gunicorn settings
 gunicorn_user: "{{ project_name }}"
 gunicorn_group: webapps
