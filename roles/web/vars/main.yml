@@ -56,3 +56,7 @@ django_environment:
   EMAIL_PORT: "{{ email_port }}"
   SERVER_EMAIL: "{{ server_email }}"
   DEFAULT_FROM_EMAIL: "{{ default_from_email }}"
+  SLACK_TOKEN: "{{ slack_token|default(omit) }}"
+  SLACK_CHANNEL: "{{ slack_channel }}"
+  SLACK_ICON_EMOJI: "{{ slack_icon_emoji }}"
+  SLACK_USERNAME: "{{ slack_username }}"

@@ -74,3 +74,6 @@ ssl_key: |
 #aws_access_key_id: ''
 #aws_secret_access_key: ''
 #mapbox_access_token: ''
+slack_channel: '#firecares'
+slack_icon_emoji: ':goberserk:'
+slack_username: edgebot
