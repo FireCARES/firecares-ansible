@@ -60,6 +60,16 @@
   when: fixtures_sql.stat.exists is defined and fixtures_sql.stat.exists
   sudo_user: postgres
 
+- name: Run the Django syncdb command again (since fixtured have been loaded)
+  django_manage:
+    command: syncdb
+    app_path: "{{ project_path }}"
+    virtualenv: "{{ virtualenv_path }}"
+    settings: "{{ django_settings_file }}"
+  environment: django_environment
+  when: fixtures_sql.stat.exists is defined and fixtures_sql.stat.exists
+  tags: django.syncdb
+
 - name: remove fixtures
   file: path=/tmp/firecares_fixtures.sql.gz state=absent
   when: p.stat.exists is defined and p.stat.exists
