@@ -22,7 +22,7 @@ gunicorn_num_workers: 3
 gunicorn_max_requests: 1
 
 gunicorn_timeout_seconds: 300
-
+gunicorn_log_level: debug
 
 # Nginx settings.
 nginx_server_name: 192.168.33.15

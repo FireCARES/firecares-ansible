@@ -33,6 +33,6 @@ exec gunicorn \
     --max-requests $MAX_REQUESTS \
     --timeout {{ gunicorn_timeout_seconds|default(30) }} \
     --user $USER --group $GROUP \
-    --log-level debug \
+    --log-level {{ gunicorn_log_level }} \
     --bind unix:$SOCKFILE \
     {{ application_name }}.wsgi
