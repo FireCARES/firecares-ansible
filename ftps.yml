@@ -1,0 +1,7 @@
+- name: firecares ftp
+  hosts: ftps
+  sudo: yes
+  vars_files:
+    - env_vars/production.yml
+  roles:
+    - sftp-server

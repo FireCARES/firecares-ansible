@@ -1,0 +1,5 @@
+---
+sftp_home_partition: /data
+sftp_group_name: sftpusers
+sftp_directories: []
+sftp_allow_passwords: False
