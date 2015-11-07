@@ -59,6 +59,7 @@
   command: psql -d {{ db_name }} -f /tmp/firecares_fixtures.sql chdir=/tmp
   when: fixtures_sql.stat.exists is defined and fixtures_sql.stat.exists
   sudo_user: postgres
+  notify: update full text column
 
 - name: Run the Django syncdb command again (since fixtured have been loaded)
   django_manage:
