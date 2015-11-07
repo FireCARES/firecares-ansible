@@ -70,10 +70,12 @@ ssl_key: |
   MoqV6aeRY/7uwLiviaIUJg==
   -----END PRIVATE KEY-----
 
-#aws_storage_bucket_name: ''
-#aws_access_key_id: ''
-#aws_secret_access_key: ''
-#mapbox_access_token: ''
+aws_storage_bucket_name:
+aws_access_key_id:
+aws_secret_access_key:
+mapbox_access_token:
+
 slack_channel: '#firecares'
 slack_icon_emoji: ':goberserk:'
 slack_username: edgebot
+update_fixtures: false

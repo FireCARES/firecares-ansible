@@ -28,3 +28,7 @@
 
 - include: ipython_notebook.yml
   tags: ipython_notebook
+
+- include: update_fixtures.yml
+  tags: update_fixtures
+  when: update_fixtures | bool
