@@ -1,5 +1,7 @@
 server_tokens off;
 
+add_header X-Frame-Options SAMEORIGIN;
+
 upstream {{ application_name }}_wsgi_server {
   # fail_timeout=0 means we always retry an upstream even if it failed
   # to return a good HTTP response (in case the Unicorn master nukes a
