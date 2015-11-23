@@ -40,6 +40,8 @@
     - libatlas-base-dev
     - gfortran
     - unattended-upgrades
+    - libxml2-dev
+    - libxslt-dev
   tags: packages
 
 - name: activate unattended-upgrades
