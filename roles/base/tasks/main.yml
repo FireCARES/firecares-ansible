@@ -33,8 +33,7 @@
     - libpng-dev
     - libfreetype6-dev
     - pkg-config
-    - libjpeg62
-    - libjpeg62-dev
+    - libjpeg-dev
     - libblas-dev
     - liblapack-dev
     - libatlas-base-dev
