@@ -9,7 +9,7 @@ postgresql_version: "9.3"
 postgis_version: "2.1"
 postgis_package_version: "2.1.*.pgdg14.04+1"
 
-tiles: ["firecares_addresses.mbtiles", "firecares_stations_districts.mbtiles"]
+tiles: ["firecares_addresses.mbtiles", "stations.mbtiles", "districts.mbtiles", "hydrants.mbtiles"]
 
 ssl_dest_dir: /etc/ssl
 
@@ -79,3 +79,4 @@ slack_channel: '#firecares'
 slack_icon_emoji: ':goberserk:'
 slack_username: edgebot
 update_fixtures: false
+mapbox_access_token: pk.eyJ1IjoiZ2FybmVydGIiLCJhIjoiNW5ZYkExNCJ9.sIFdyxQ4n1UQFEenEJ1RGg
