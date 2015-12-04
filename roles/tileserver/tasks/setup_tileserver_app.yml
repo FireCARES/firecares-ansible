@@ -62,7 +62,7 @@
         group={{ gunicorn_group }}
         state=directory
 
-- get_url: url="https://s3.amazonaws.com/firecares-tiles/{{item}}" dest={{tiles_path}}/{{item}}
+- get_url: url="https://s3.amazonaws.com/firecares-tiles/{{item}}" dest={{tiles_path}}/{{item}} force=yes
   with_items: "{{tiles}}"
   tags: mbtiles.download
 
