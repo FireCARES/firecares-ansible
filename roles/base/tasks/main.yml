@@ -41,6 +41,8 @@
     - unattended-upgrades
     - libxml2-dev
     - libxslt-dev
+    - libffi-dev
+
   tags: packages
 
 - name: activate unattended-upgrades
