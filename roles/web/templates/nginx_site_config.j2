@@ -33,6 +33,11 @@ server {
         alias   {{ nginx_media_dir }};
     }
 
+    location /tmp/ {
+       internal;
+       alias   /tmp/;
+    }
+
     location / {
         if (-f {{ virtualenv_path }}/maintenance_on.html) {
             return 503;
