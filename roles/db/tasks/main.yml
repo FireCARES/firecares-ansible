@@ -36,8 +36,11 @@
 
 - name: Create the PostGIS Extension
   sudo_user: postgres
-  postgresql_ext: name=postgis
-                  db={{ db_name }}
+  postgresql_ext: name={{ item }} db={{ db_name }}
+  with_items:
+    - postgis
+    - pg_trgm
+    - fuzzystrmatch
 
 - name: Ensure user has access to the database
   sudo_user: postgres
