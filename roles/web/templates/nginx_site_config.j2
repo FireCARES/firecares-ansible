@@ -14,6 +14,10 @@ server {
     listen      80;
     server_name {{ nginx_server_name }};
 
+    if ($http_x_forwarded_proto = 'http') {
+            return 301 https://$host$request_uri;
+    }
+
     client_max_body_size 4G;
 
     access_log {{ nginx_access_log_file }};
