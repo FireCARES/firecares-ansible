@@ -70,6 +70,7 @@ ssl_key: |
   MoqV6aeRY/7uwLiviaIUJg==
   -----END PRIVATE KEY-----
 
+service_area_server: http://gis.iaff.org/arcgis/rest/services/Production/101ServerServiceAreaOct2012/GPServer/101ServerServiceAreaOct2012/execute
 aws_storage_bucket_name:
 aws_access_key_id:
 aws_secret_access_key:

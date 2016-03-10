@@ -14,10 +14,6 @@ server {
     listen      80;
     server_name {{ nginx_server_name }};
 
-    if ($http_x_forwarded_proto = 'http') {
-            return 301 https://$host$request_uri;
-    }
-
     client_max_body_size 4G;
 
     access_log {{ nginx_access_log_file }};
@@ -37,6 +33,17 @@ server {
         alias   {{ nginx_media_dir }};
     }
 
+    location /service-area/ {
+      access_log off;
+      proxy_pass {{ service_area_server }};
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header Host $host;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      expires 30d;
+      add_header Pragma public;
+      add_header Cache-Control "public";
+   }
+
     location /tmp/ {
        internal;
        alias   /tmp/;
@@ -45,6 +52,10 @@ server {
     location / {
         if (-f {{ virtualenv_path }}/maintenance_on.html) {
             return 503;
+        }
+
+        if ($http_x_forwarded_proto = 'http') {
+            return 301 https://$host$request_uri;
         }
 
         {% if django_allowed_hosts is defined %}
