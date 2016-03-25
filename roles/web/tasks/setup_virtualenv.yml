@@ -53,3 +53,6 @@
 
 - name: add source line to user profile
   lineinfile: dest=/home/{{gunicorn_user}}/.bashrc line="source /usr/local/bin/virtualenvwrapper.sh" state=present
+
+- name: add osgeo path file to virtualenv
+  copy: content='/usr/lib/python2.7/dist-packages/osgeo/' dest={{virtualenv_path}}/lib/python2.7/site-packages/osgeo.pth
