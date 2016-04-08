@@ -14,3 +14,11 @@
         owner={{ gunicorn_user }}
         group={{ gunicorn_group }}
         state=directory
+
+
+- name: Ensure that the media file permissions are set properly
+  file: path={{ nginx_media_dir }}
+        recurse=yes
+        owner={{ gunicorn_user }}
+        group={{ gunicorn_group }}
+        state=directory
