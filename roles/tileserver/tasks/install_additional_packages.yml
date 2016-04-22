@@ -17,15 +17,16 @@
   pip: name=boto
   tags: packages
 
-- npm: name={{item}} global=yes
+
+- npm: name={{item.name}} global=yes state=present version={{item.version}}
   with_items:
-    - https://github.com/garnertb/tessera/archive/firecares.tar.gz
-    - tilelive-mapnik
-    - tilelive-mapbox
-    - tilelive-vector
-    - tilelive-tmstyle
-    - mojodna/tilelive-merge
-    - mbtiles
+    - {'name': 'git://github.com/garnertb/tessera#firecares', 'version':''}
+    - {'name':'tilelive-mapnik', 'version': '0.6.17'}
+    - {'name': 'tilelive-mapbox', 'version': '0.4.0'}
+    - {'name': 'tilelive-tmstyle', 'version': '0.4.2'}
+    - {'name': 'git://github.com/mojodna/tilelive-merge#v1.0.2', 'version': ''}
+    - {'name': 'mbtiles', 'version': '0.8.0'}
+  tags: npm
 
 - name: Install virtualenv
   pip: name=virtualenv
