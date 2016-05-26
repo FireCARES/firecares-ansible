@@ -60,3 +60,4 @@ django_environment:
   SLACK_CHANNEL: "{{ slack_channel }}"
   SLACK_ICON_EMOJI: "{{ slack_icon_emoji }}"
   SLACK_USERNAME: "{{ slack_username }}"
+  CELERY_RESULT_BACKEND: "cache+memcached://{{memcache_location}}"
