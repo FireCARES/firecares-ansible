@@ -49,6 +49,15 @@ server {
        alias   /tmp/;
     }
 
+
+    {% if development_mode is defined and development_mode %}
+    # route to the debug process
+    location / {
+        # pycharm will remotely run the app on port 8000, route traffic for web app to that port
+        proxy_pass http://{{nginx_server_name}}:8000;
+    }
+
+    {% else %}
     location / {
         if (-f {{ virtualenv_path }}/maintenance_on.html) {
             return 503;
@@ -77,6 +86,8 @@ server {
             break;
         }
     }
+    {% endif %}
+
 
     # Error pages
     error_page 500 502 504 /500.html;

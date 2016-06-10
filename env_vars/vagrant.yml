@@ -1,5 +1,10 @@
 ---
 
+# when in development mode, supervisor wont run the application, developers will start the
+# application remotely from pycharm on port 8000. nginx is then configured to route everything
+# to port 8000, and the application user will be allowed to ssh in.
+development_mode: no
+
 # Git settings.
 # When using vagrant, symlink FireCARES vs using Git.
 setup_git_repo: no
