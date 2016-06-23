@@ -49,6 +49,18 @@ server {
        alias   /tmp/;
     }
 
+    location /files/ {
+        internal;
+        proxy_http_version     1.1;
+        proxy_set_header       Authorization '';
+        proxy_hide_header      x-amz-id-2;
+        proxy_hide_header      x-amz-request-id;
+        proxy_hide_header      Set-Cookie;
+        proxy_ignore_headers   "Set-Cookie";
+        proxy_buffering        off;
+        proxy_intercept_errors on;
+        proxy_pass https://s3.amazonaws.com/;
+    }
 
     {% if development_mode is defined and development_mode %}
     # route to the debug process
