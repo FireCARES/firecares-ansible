@@ -89,3 +89,4 @@ firecares_users:
     is_superuser: True
     is_staff: True
     email: admin@firecares.org
+
