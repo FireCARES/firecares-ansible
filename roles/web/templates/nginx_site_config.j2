@@ -69,7 +69,7 @@ server {
 
 
     location / {
-        try_files $uri $uri/ @django;
+        try_files $uri @django;
     }
 
     {% if development_mode is defined and development_mode %}

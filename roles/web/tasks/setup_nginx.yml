@@ -31,3 +31,6 @@
 
 - name: Ensure Nginx service is started
   service: name=nginx state=started enabled=yes
+
+- name: Remove index.html
+  file: path=/usr/share/nginx/html/index.html state=absent
