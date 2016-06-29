@@ -91,5 +91,5 @@
   tags: django.add_user
 
 # generate the sitemap daily.
-- cron: name="update sitemap.xml" special_time="daily" user="{{gunicorn_user}}" job="/usr/local/bin/curl --unix-socket /webapps/firecares/run/gunicorn.sock http:/sitemap.xml --output /var/www/firecares/static/sitemap.xml --silent"
+- cron: name="update sitemap.xml" special_time="daily" user="{{gunicorn_user}}" job="/usr/local/bin/curl --unix-socket /webapps/firecares/run/gunicorn.sock http:/sitemap.xml --output /var/www/firecares/static/sitemap.xml --silent -H 'Host: firecares.org'"
 
