@@ -29,6 +29,11 @@ server {
         alias   {{ nginx_static_dir }};
     }
 
+    location /sitemap.xml {
+      root {{ nginx_static_dir }};
+      try_files $uri @django;
+    }
+
     location /media/ {
         alias   {{ nginx_media_dir }};
     }
@@ -62,15 +67,20 @@ server {
         proxy_pass https://s3.amazonaws.com/;
     }
 
+
+    location / {
+        try_files $uri $uri/ @django;
+    }
+
     {% if development_mode is defined and development_mode %}
     # route to the debug process
-    location / {
+    location @django {
         # pycharm will remotely run the app on port 8000, route traffic for web app to that port
         proxy_pass http://{{nginx_server_name}}:8000;
     }
 
     {% else %}
-    location / {
+    location @django {
         if (-f {{ virtualenv_path }}/maintenance_on.html) {
             return 503;
         }

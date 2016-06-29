@@ -73,3 +73,6 @@
   with_items:
     - boto
     - awscli
+
+- name: update curl
+  script: roles/base/files/update-curl.sh
