@@ -15,7 +15,7 @@
   ignore_errors: yes
 
 - name: upload fixtures to s3
-  command: aws s3 cp {{virtualenv_path}}/firecares_fixtures.sql.gz s3://firecares-share/fixtures/firecares_fixtures.sql.gz --acl public-read
+  command: aws s3 cp {{virtualenv_path}}/firecares_fixtures.sql.gz s3://firecares-share/fixtures/firecares_fixtures.sql.gz
   become_user: "{{ gunicorn_user }}"
 
 - name: remove fixtures

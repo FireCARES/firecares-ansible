@@ -41,9 +41,10 @@
   tags: django.collectstatic
 
 - name: download fixtures
-  get_url: url=https://s3.amazonaws.com/firecares-share/fixtures/firecares_fixtures.sql.gz dest=/tmp/firecares_fixtures.sql.gz timeout=30
+  command: aws s3 cp s3://firecares-share/fixtures/firecares_fixtures.sql.gz /tmp/firecares_fixtures.sql.gz
   register: download_fixtures
-  when: db_created is defined and db_created.changed
+  when: db_created is defined and db_created.changed and aws_access_key_id is defined and aws_access_key_id
+  tags: download_fixtures
 
 - stat: path=/tmp/firecares_fixtures.sql.gz
   register: p
