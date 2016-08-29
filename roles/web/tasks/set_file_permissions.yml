@@ -22,3 +22,9 @@
         owner={{ gunicorn_user }}
         group={{ gunicorn_group }}
         state=directory
+
+- name: Ensure that the department thumbnails folder exists
+  file: path=/home/{{ gunicorn_user }}/department-thumbnails
+        owner={{ gunicorn_user }}
+        group={{ gunicorn_group }}
+        state=directory
