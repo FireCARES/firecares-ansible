@@ -54,6 +54,19 @@
             mode=0755
             backup=no
   tags: deploy
+  notify:
+    - restart tessera
+
+- name: Create the parcels mapnik configuration
+  template: src=parcels.xml.j2
+            dest={{ project_path }}/parcels.xml
+            owner={{ gunicorn_user }}
+            group={{ gunicorn_group }}
+            mode=0755
+            backup=no
+  tags: deploy
+  notify:
+    - restart tessera
 
 - name: Ensure that the application file permissions are set properly
   file: path={{ tiles_path }}
