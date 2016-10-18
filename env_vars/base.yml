@@ -80,5 +80,6 @@ slack_channel: '#firecares'
 slack_icon_emoji: ':goberserk:'
 slack_username: edgebot
 update_fixtures: false
+slack_firecares_command_token: 'test'
 mapbox_access_token: pk.eyJ1IjoiZ2FybmVydGIiLCJhIjoiNW5ZYkExNCJ9.sIFdyxQ4n1UQFEenEJ1RGg
 document_upload_bucket: 'firecares-uploads-test'
