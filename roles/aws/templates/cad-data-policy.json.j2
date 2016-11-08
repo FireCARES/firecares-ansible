@@ -1,0 +1,32 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "putObjectPerms",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::streaming.firecares.org/{{department_id}}/incoming/*",
+                "arn:aws:s3:::streaming.firecares.org/{{department_id}}/incoming"
+            ]
+        },
+        {
+            "Sid": "listBucketPerms",
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::streaming.firecares.org/*",
+                "arn:aws:s3:::streaming.firecares.org"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "s3:prefix": "{{department_id}}/incoming/cad/"
+                }
+            }
+        }
+    ]
+}

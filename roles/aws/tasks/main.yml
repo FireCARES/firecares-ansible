@@ -1,0 +1,22 @@
+- s3: bucket="streaming.firecares.org" object=/{{department_id}}/{{item}}/cad mode=create region=us-east-1
+  with_items:
+    - incoming
+    - processed
+
+- iam:
+    iam_type: user
+    name: "{{department_id}}@streaming.firecares.org"
+    state: present
+    access_key_state: create
+  register: iam_role_res
+
+- debug: var=iam_role_res
+- debug: msg="{{ lookup( 'template', 'templates/cad-data-policy.json.j2') }}"
+
+- iam_policy:
+    iam_type: user
+    iam_name: "{{iam_role_res.user_name}}"
+    state: present
+    policy_json: "{{ lookup( 'template', 'templates/cad-data-policy.json.j2') }}"
+    policy_name: "{{iam_role_res.user_name}}_cad_data_policy"
+    
