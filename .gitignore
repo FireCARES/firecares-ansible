@@ -1,7 +1,6 @@
 .idea
 .vagrant
 vagrant_ansible_inventory_default
-production-playbook.yml
 *.pem
 env_vars/aws-single.yml
 aws.yml
