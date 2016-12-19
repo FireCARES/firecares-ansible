@@ -3,19 +3,19 @@
 # ansible-playbook production-playbook.yml -i production.yml --tags=update_fixtures -e update_fixtures=true --limit webservers
 
 - name: dump fixtures
-  shell: pg_dump {{database_name}} -h {{database_host}} -p {{database_port}} -t firecares_core_address -t firecares_core_country -t firestation_firedepartment -t firestation_firestation -t firestation_nfirsstatistic -t firestations -t firestation_staffing -t firestation_usgsstructuredata -t geography_columns -t geometry_columns -t raster_columns -t raster_overviews -t spatial_ref_sys -t usgs_congressionaldistrict -t usgs_countyorequivalent -t usgs_govunits -t usgs_incorporatedplace -t usgs_minorcivildivision -t usgs_nativeamericanarea -t usgs_reserve -t usgs_stateorterritoryhigh -t usgs_unincorporatedplace -O --disable-triggers -a | gzip > {{virtualenv_path}}/firecares_fixtures.sql.gz
+  shell: pg_dump {{database_name}} -h {{database_host}} -p {{database_port}} -t firecares_core_address -t firecares_core_country -t firestation_firedepartment -t firestation_firestation -t firestation_nfirsstatistic -t firestations -t firestation_staffing -t firestation_usgsstructuredata -t geography_columns -t geometry_columns -t raster_columns -t raster_overviews -t spatial_ref_sys -t usgs_congressionaldistrict -t usgs_countyorequivalent -t usgs_govunits -t usgs_incorporatedplace -t usgs_minorcivildivision -t usgs_nativeamericanarea -t usgs_reserve -t usgs_stateorterritoryhigh -t usgs_unincorporatedplace -t firecares_firedepartmentriskmodels -O --disable-triggers -a | gzip > {{virtualenv_path}}/firecares_fixtures.sql.gz
   become_user: "{{ gunicorn_user }}"
   environment:
     PGPASSWORD: "{{database_password}}"
     PGUSER: "{{database_user}}"
 
 - name: backup_old_fixture
-  command: aws s3 mv s3://firecares-share/fixtures/firecares_fixtures.sql.gz s3://firecares-share/fixtures/backups/{{ansible_date_time.date}}-firecares_fixtures.sql.gz
+  command: aws s3 mv s3://firecares-share/fixtures/firecares_fixtures_public.sql.gz s3://firecares-share/fixtures/backups/{{ansible_date_time.date}}-firecares_fixtures_public.sql.gz
   become_user: "{{ gunicorn_user }}"
   ignore_errors: yes
 
 - name: upload fixtures to s3
-  command: aws s3 cp {{virtualenv_path}}/firecares_fixtures.sql.gz s3://firecares-share/fixtures/firecares_fixtures.sql.gz
+  command: aws s3 cp {{virtualenv_path}}/firecares_fixtures.sql.gz s3://firecares-share/fixtures/firecares_fixtures_public.sql.gz
   become_user: "{{ gunicorn_user }}"
 
 - name: remove fixtures

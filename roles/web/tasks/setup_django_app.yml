@@ -41,7 +41,7 @@
   tags: django.collectstatic
 
 - name: download fixtures
-  command: aws s3 cp s3://firecares-share/fixtures/firecares_fixtures.sql.gz /tmp/firecares_fixtures.sql.gz
+  command: aws s3 cp s3://firecares-share/fixtures/firecares_fixtures_public.sql.gz /tmp/firecares_fixtures.sql.gz
   register: download_fixtures
   when: db_created is defined and db_created.changed and aws_access_key_id is defined and aws_access_key_id
   tags: download_fixtures
@@ -96,4 +96,3 @@
   with_items:
     - {host: '\"Host: firecares.org\"'}
   tags: django.cron_jobs
-
