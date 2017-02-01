@@ -1,0 +1,15 @@
+[tag_Name_rabbitmq_dev]
+[tag_Name_web_server_dev]
+
+[dev-rabbitmq:children]
+tag_Name_rabbitmq_dev
+
+[dev-webservers:children]
+tag_Name_web_server_dev
+
+[dev:children]
+dev-rabbitmq
+dev-webservers
+
+[all:vars]
+ansible_ssh_user=ubuntu

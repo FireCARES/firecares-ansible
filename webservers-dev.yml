@@ -1,0 +1,21 @@
+---
+- name: Create a {{ application_name }} webserver
+  hosts: dev-webservers
+  sudo: yes
+  sudo_user: root
+  remote_user: ubuntu
+  vars:
+    - setup_git_repo: yes
+    - update_apt_cache: yes
+  vars_files:
+    - env_vars/base.yml
+    - env_vars/development_aws.yml
+
+  environment:
+      AWS_ACCESS_KEY_ID: "{{ aws_access_key_id }}"
+      AWS_SECRET_ACCESS_KEY: "{{ aws_secret_access_key }}"
+
+  roles:
+    - base
+    - web
+    - celery
