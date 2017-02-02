@@ -91,7 +91,7 @@ server {
 
         {% if django_allowed_hosts is defined %}
         ## Deny illegal Host headers
-        if ($host !~* ^({{django_allowed_hosts|join('|')}})$ ) {
+        if ($host !~* ({{django_allowed_hosts|join('|')}}) ) {
             return 444;
         }
         {% endif %}
