@@ -64,3 +64,4 @@ django_environment:
   CELERY_RESULT_BACKEND: "cache+memcached://{{memcache_location}}"
   DOCUMENT_UPLOAD_BUCKET: "{{document_upload_bucket}}"
   HELIX_SECRET: "{{ helix_secret|default(omit) }}"
+  COMPRESS_URL: "{{compress_url|default(omit)}}"
