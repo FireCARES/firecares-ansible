@@ -17,7 +17,7 @@
     virtualenv: "{{ virtualenv_path }}"
     settings: "{{ django_settings_file }}"
   environment: django_environment
-  when: run_django_syncdb is defined and run_django_sync_db
+  when: run_django_sync_db is defined and run_django_sync_db
   tags: django.syncdb
 
 - name: Run Django database migrations
