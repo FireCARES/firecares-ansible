@@ -1,0 +1,341 @@
+{
+    "Description": "Create a FireCARES Instance",
+    "Outputs": {
+        "RabbitMQIP": {
+            "Description": "RabbitMQ's Elastic IP",
+            "Value": {
+                "Ref": "RabbitMQEIP"
+            }
+        }
+    },
+    "Parameters": {
+        "DBAllocatedStorage": {
+            "ConstraintDescription": "must be between 5 and 1024Gb.",
+            "Default": "5",
+            "Description": "The size of the database (Gb)",
+            "MaxValue": "1024",
+            "MinValue": "5",
+            "Type": "Number"
+        },
+        "DBInstanceClass": {
+            "AllowedValues": [
+                "db.t1.micro",
+                "db.m1.small",
+                "db.m1.medium",
+                "db.m1.large",
+                "db.m1.xlarge",
+                "db.m2.xlarge",
+                "db.m2.2xlarge",
+                "db.m2.4xlarge",
+                "db.m3.medium",
+                "db.m3.large",
+                "db.m3.xlarge",
+                "db.m3.2xlarge",
+                "db.m4.large",
+                "db.m4.xlarge",
+                "db.m4.2xlarge",
+                "db.m4.4xlarge",
+                "db.m4.10xlarge",
+                "db.r3.large",
+                "db.r3.xlarge",
+                "db.r3.2xlarge",
+                "db.r3.4xlarge",
+                "db.r3.8xlarge",
+                "db.m2.xlarge",
+                "db.m2.2xlarge",
+                "db.m2.4xlarge",
+                "db.cr1.8xlarge",
+                "db.t2.micro",
+                "db.t2.small",
+                "db.t2.medium",
+                "db.t2.large"
+            ],
+            "ConstraintDescription": "must select a valid database instance type.",
+            "Default": "db.t2.small",
+            "Description": "The database instance type",
+            "Type": "String"
+        },
+        "DBPassword": {
+            "AllowedPattern": "[a-zA-Z0-9]*",
+            "ConstraintDescription": "must contain only alphanumeric characters.",
+            "Description": "Password for PostgreSQL database access",
+            "MaxLength": 41,
+            "MinLength": 8,
+            "NoEcho": true,
+            "Type": "String"
+        },
+        "DBUser": {
+            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+            "ConstraintDescription": "Must begin with a letter and contain only alphanumeric characters.",
+            "Description": "Username for PostgreSQL database access",
+            "MaxLength": 16,
+            "MinLength": 1,
+            "NoEcho": true,
+            "Type": "String"
+        },
+        "Environment": {
+            "Default": "dev",
+            "Description": "Stack environment (e.g. prod, dev, int)",
+            "MaxLength": "12",
+            "MinLength": "1",
+            "Type": "String"
+        },
+        "KeyName": {
+            "ConstraintDescription": "Must be the name of an existing EC2 KeyPair.",
+            "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "MultiAZDatabase": {
+            "AllowedValues": [
+                "true",
+                "false"
+            ],
+            "ConstraintDescription": "must be either true or false.",
+            "Default": "false",
+            "Description": "Create a Multi-AZ PostgreSQL Amazon RDS database instance",
+            "Type": "String"
+        },
+        "RabbitInstanceClass": {
+            "AllowedValues": [
+                "t1.micro",
+                "t2.nano",
+                "t2.micro",
+                "t2.small",
+                "t2.medium",
+                "t2.large",
+                "m1.small",
+                "m1.medium",
+                "m1.large",
+                "m1.xlarge",
+                "m2.xlarge",
+                "m2.2xlarge",
+                "m2.4xlarge",
+                "m3.medium",
+                "m3.large",
+                "m3.xlarge",
+                "m3.2xlarge",
+                "m4.large",
+                "m4.xlarge",
+                "m4.2xlarge",
+                "m4.4xlarge",
+                "m4.10xlarge",
+                "c1.medium",
+                "c1.xlarge",
+                "c3.large",
+                "c3.xlarge",
+                "c3.2xlarge",
+                "c3.4xlarge",
+                "c3.8xlarge",
+                "c4.large",
+                "c4.xlarge",
+                "c4.2xlarge",
+                "c4.4xlarge",
+                "c4.8xlarge",
+                "g2.2xlarge",
+                "g2.8xlarge",
+                "r3.large",
+                "r3.xlarge",
+                "r3.2xlarge",
+                "r3.4xlarge",
+                "r3.8xlarge",
+                "i2.xlarge",
+                "i2.2xlarge",
+                "i2.4xlarge",
+                "i2.8xlarge",
+                "d2.xlarge",
+                "d2.2xlarge",
+                "d2.4xlarge",
+                "d2.8xlarge",
+                "hi1.4xlarge",
+                "hs1.8xlarge",
+                "cr1.8xlarge",
+                "cc2.8xlarge",
+                "cg1.4xlarge"
+            ],
+            "ConstraintDescription": "must be a valid EC2 instance type.",
+            "Default": "t2.small",
+            "Description": "RabbitMQ EC2 instance type",
+            "Type": "String"
+        },
+        "VpcId": {
+            "ConstraintDescription": "must be an existing VPC name.",
+            "Default": "vpc-fc94c499",
+            "Description": "Name of an existing vpc",
+            "Type": "String"
+        },
+        "WebServerSG": {
+            "ConstraintDescription": "Must be the name of an existing security group",
+            "Default": "sg-ee029092",
+            "Description": "The GroupID of the Webserver Security Group",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "DBSecurityGroup": {
+            "Properties": {
+                "GroupDescription": "Client access.",
+                "SecurityGroupIngress": [
+                    {
+                        "FromPort": "5432",
+                        "IpProtocol": "tcp",
+                        "SourceSecurityGroupId": {
+                            "Ref": "WebServerSG"
+                        },
+                        "ToPort": "5432"
+                    },
+                    {
+                        "CidrIp": "69.255.184.149/32",
+                        "FromPort": "5432",
+                        "IpProtocol": "tcp",
+                        "ToPort": "5432"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VpcId"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "DocumentUploadBucket": {
+            "Properties": {
+                "AccessControl": "PublicRead",
+                "BucketName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "firecares",
+                            {
+                                "Ref": "Environment"
+                            },
+                            "uploads"
+                        ]
+                    ]
+                }
+            },
+            "Type": "AWS::S3::Bucket"
+        },
+        "Ec2Instance": {
+            "Properties": {
+                "ImageId": "ami-d05e75b8",
+                "InstanceType": {
+                    "Ref": "RabbitInstanceClass"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroups": [
+                    {
+                        "Ref": "RabbitMQ"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    "rabbitmq",
+                                    {
+                                        "Ref": "Environment"
+                                    }
+                                ]
+                            ]
+                        }
+                    }
+                ]
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "RabbitMQ": {
+            "Properties": {
+                "GroupDescription": "rabbitmq-sg-ingress",
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "54.173.150.226/32",
+                        "FromPort": "22",
+                        "IpProtocol": "tcp",
+                        "ToPort": "22"
+                    },
+                    {
+                        "CidrIp": "69.255.184.149/32",
+                        "FromPort": "22",
+                        "IpProtocol": "tcp",
+                        "ToPort": "22"
+                    },
+                    {
+                        "CidrIp": "69.255.184.149/32",
+                        "FromPort": "15672",
+                        "IpProtocol": "tcp",
+                        "ToPort": "15672"
+                    },
+                    {
+                        "CidrIp": "69.255.184.149/32",
+                        "FromPort": "5672",
+                        "IpProtocol": "tcp",
+                        "ToPort": "5672"
+                    },
+                    {
+                        "FromPort": "5672",
+                        "IpProtocol": "tcp",
+                        "SourceSecurityGroupId": {
+                            "Ref": "WebServerSG"
+                        },
+                        "ToPort": "5672"
+                    }
+                ]
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "RabbitMQEIP": {
+            "Properties": {
+                "Domain": "vpc",
+                "InstanceId": {
+                    "Ref": "Ec2Instance"
+                }
+            },
+            "Type": "AWS::EC2::EIP"
+        },
+        "StaticBucket": {
+            "Properties": {
+                "AccessControl": "PublicRead",
+                "BucketName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "firecares",
+                            {
+                                "Ref": "Environment"
+                            },
+                            "static"
+                        ]
+                    ]
+                }
+            },
+            "Type": "AWS::S3::Bucket"
+        },
+        "db": {
+            "Properties": {
+                "AllocatedStorage": {
+                    "Ref": "DBAllocatedStorage"
+                },
+                "DBInstanceClass": {
+                    "Ref": "DBInstanceClass"
+                },
+                "Engine": "postgres",
+                "MasterUserPassword": {
+                    "Ref": "DBPassword"
+                },
+                "MasterUsername": {
+                    "Ref": "DBUser"
+                },
+                "VPCSecurityGroups": [
+                    {
+                        "Ref": "DBSecurityGroup"
+                    }
+                ]
+            },
+            "Type": "AWS::RDS::DBInstance"
+        }
+    }
+}
