@@ -262,6 +262,14 @@ t.add_output([
     )
 ])
 
+t.add_output([
+    Output(
+        "WebServerSecurityGroup",
+        Description="WebserverSecurityGroup",
+        Value=Ref(webserver_sg),
+    )
+])
+
 
 if __name__ == '__main__':
     print t.to_json()
