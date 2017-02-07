@@ -59,10 +59,10 @@ db_storage = t.add_parameter(Parameter(
     "DBAllocatedStorage",
     Description="The size of the database (Gb)",
     Type="Number",
-    ConstraintDescription="must be between 5 and 1024Gb.",
-    MinValue="5",
+    ConstraintDescription="must be between 10 and 1024Gb.",
+    MinValue="10",
     MaxValue="1024",
-    Default="5"
+    Default="10"
 ))
 
 db_instance_class = t.add_parameter(Parameter(

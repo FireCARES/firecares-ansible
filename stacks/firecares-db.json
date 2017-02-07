@@ -6,15 +6,21 @@
             "Value": {
                 "Ref": "RabbitMQEIP"
             }
+        },
+        "WebServerSecurityGroup": {
+            "Description": "WebserverSecurityGroup",
+            "Value": {
+                "Ref": "WebServerSG"
+            }
         }
     },
     "Parameters": {
         "DBAllocatedStorage": {
-            "ConstraintDescription": "must be between 5 and 1024Gb.",
-            "Default": "5",
+            "ConstraintDescription": "must be between 10 and 1024Gb.",
+            "Default": "10",
             "Description": "The size of the database (Gb)",
             "MaxValue": "1024",
-            "MinValue": "5",
+            "MinValue": "10",
             "Type": "Number"
         },
         "DBInstanceClass": {
