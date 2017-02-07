@@ -150,6 +150,7 @@ web_sg = t.add_resource(SecurityGroup(
                           ),
         SecurityGroupRule("JenkinsAccess", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="54.173.150.226/32"),
         SecurityGroupRule("TylerAccess", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="69.255.184.149/32"),
+        SecurityGroupRule("JoeAccess", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="65.254.97.100/32")
         ],
     ))
 
