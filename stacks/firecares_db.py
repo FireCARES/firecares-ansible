@@ -3,7 +3,7 @@ from troposphere.autoscaling import LaunchConfiguration, AutoScalingGroup, Tag
 from troposphere.ec2 import Instance, SecurityGroup, SecurityGroupRule, EIP
 from troposphere.elasticloadbalancing import LoadBalancer, AccessLoggingPolicy
 from troposphere.rds import DBInstance, DBParameterGroup, DBSecurityGroup, DBSecurityGroupIngress, RDSSecurityGroup
-from troposphere.s3 import Bucket, PublicRead
+from troposphere.s3 import Bucket, PublicRead, CorsConfiguration, CorsRules
 
 t = Template()
 t.add_description("Create a FireCARES Instance")
@@ -249,7 +249,9 @@ eip = t.add_resource(EIP(
 
 static_bucket = t.add_resource(Bucket("StaticBucket",
                        BucketName=Join('-', ['firecares', Ref(environment), 'static']),
-                       AccessControl=PublicRead))
+                       AccessControl=PublicRead,
+                       CorsConfiguration=CorsConfiguration(CorsRules=[CorsRules(AllowedOrigins=['https://test.firecares.org'], AllowedMethods=['GET', 'HEAD'])])
+                       ))
 
 document_upload_bucket = t.add_resource(Bucket("DocumentUploadBucket",
                                 BucketName=Join('-', ['firecares', Ref(environment), 'uploads']),
