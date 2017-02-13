@@ -22,7 +22,11 @@
                 "apt-add-repository ppa:rquillo/ansible",
                 "/usr/bin/apt-get update",
                 "/usr/bin/apt-get -y install openssl libssl-dev libssl-doc build-essential libffi-dev python-dev python-pip",
-                "pip install ansible==1.9.4"
+                "pip install ansible==1.9.4",
+                "sudo dd if=/dev/zero of=/var/swap.img bs=1M count=1024",
+                "sudo mkswap /var/swap.img",
+                "sudo swapon /var/swap.img",
+                "sudo echo \"/var/swap.img  swap       swap    defaults        0 0\" >> /etc/fstab"
             ]
         },
         {

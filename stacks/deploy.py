@@ -3,7 +3,7 @@ import time
 from boto.cloudformation.connection import CloudFormationConnection
 from boto.cloudformation.stack import Stack
 from boto import connect_ec2
-from boto.exception import BotoServerError
+from boto.exception import BotoServerError, EC2ResponseError
 from firecares_db import t as db_server_stack
 from firecares_web import t as web_server_stack
 
@@ -99,8 +99,11 @@ def deploy(ami, env, dbpass, dbuser):
 
 
         click.secho('Updating NFIRS database security group with ingress from new web security group.')
-        ec2.authorize_security_group(group_id='sg-13fd9e77', src_security_group_group_id=sg.value, ip_protocol='tcp',
-                                     from_port=5432, to_port=5432)
+        try:
+            ec2.authorize_security_group(group_id='sg-13fd9e77', src_security_group_group_id=sg.value, ip_protocol='tcp',
+                                         from_port=5432, to_port=5432)
+        except EC2ResponseError:
+            click.secho('NFIRS web security group already exists.')
 
     # If there are old stacks, flag them for deletion.
     old_stacks = [n for n in conn.describe_stacks() if 'firecares-dev-web' in n.stack_name and ami not in n.stack_name]
