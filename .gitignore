@@ -8,3 +8,4 @@ aws-single.yml
 node_modules/
 .vault_password.txt
 *.pyc
+/manifest.json
