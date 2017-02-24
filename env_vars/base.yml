@@ -74,6 +74,7 @@ service_area_server: http://gis.iaff.org/arcgis/rest/services/Production/101Serv
 aws_storage_bucket_name:
 aws_access_key_id:
 aws_secret_access_key:
+aws_s3_custom_domain:
 mapbox_access_token:
 
 slack_channel: '#firecares'
