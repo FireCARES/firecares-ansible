@@ -75,6 +75,8 @@ aws_storage_bucket_name:
 aws_access_key_id:
 aws_secret_access_key:
 aws_s3_custom_domain:
+aws_s3_url_protocol:
+
 mapbox_access_token:
 
 slack_channel: '#firecares'
