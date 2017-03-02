@@ -36,7 +36,7 @@ server {
         proxy_ignore_headers   "Set-Cookie";
         proxy_buffering        off;
         proxy_intercept_errors on;
-        proxy_pass {{aws_s3_url_protocol}}//{{aws_s3_custom_domain}}/;
+        proxy_pass http://{{aws_s3_custom_domain}}/;
     }
 
     {% else %}
