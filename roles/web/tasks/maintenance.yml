@@ -1,0 +1,15 @@
+---
+
+- name: Enable FireCARES maintenance mode
+  shell: mv maintenance_off.html maintenance_on.html
+  args:
+    chdir: /webapps/firecares/
+    creates: maintenance_on.html
+  tags: maintenance_mode_on
+
+- name: Disable FireCARES maintenance mode
+  shell: mv maintenance_on.html maintenance_off.html
+  args:
+    chdir: /webapps/firecares/
+    creates: maintenance_off.html
+  tags: maintenance_mode_off

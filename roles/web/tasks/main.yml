@@ -32,3 +32,6 @@
 - include: update_fixtures.yml
   tags: update_fixtures
   when: update_fixtures | bool
+
+- include: maintenance.yml
+  when: maintenance_mode | default('no') | bool
