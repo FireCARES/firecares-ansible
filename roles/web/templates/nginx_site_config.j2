@@ -16,7 +16,12 @@ server {
 
     client_max_body_size 4G;
 
-    access_log {{ nginx_access_log_file }};
+    log_format firecares_access '$remote_addr - $remote_user [$time_local] '
+                                '"$request" $status $body_bytes_sent '
+                                '"$http_referer" "$http_user_agent"'
+                                ' $request_length $request_time $http_x_forwarded_for';
+
+    access_log {{ nginx_access_log_file }} firecares_access;
     error_log {{ nginx_error_log_file }};
 
     # special route for the load balancer

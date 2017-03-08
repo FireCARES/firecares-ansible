@@ -1,0 +1,9 @@
+---
+
+- name: Setup filebeat prospectors
+  template:
+    src: filebeat.full.yml
+    dest: /etc/filebeat/filebeat.yml
+    backup: yes
+  notify:
+    - restart filebeat

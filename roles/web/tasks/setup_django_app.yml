@@ -7,8 +7,7 @@
   pip: virtualenv={{ virtualenv_path }} name=numpy extra_args='--upgrade'
 
 - name: write local settings
-  template: src=local_settings.py.j2 dest={{virtualenv_path}}/firecares/firecares/settings/local_settings.py owner={{gunicorn_user}} group={{gunicorn_user}} mode=0740
-
+  template: src=local_settings.py.j2 dest={{virtualenv_path}}/firecares/firecares/settings/local_settings.py owner={{gunicorn_user}} group={{gunicorn_user}} mode=0740 force=no
 
 - name: Run the Django syncdb command
   django_manage:
