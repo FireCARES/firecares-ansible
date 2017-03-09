@@ -33,6 +33,10 @@ def delete_firecares_stack(stack_or_name):
     ec2.revoke_security_group(group_id='sg-13fd9e77', src_security_group_group_id=old_sg, ip_protocol='tcp',
                               from_port=5432, to_port=5432)
 
+    click.echo('Revoking access from security group {} to ELK.'.format(old_sg))
+    ec2.revoke_security_group(group_id='sg-f1ce248e', src_security_group_group_id=old_sg, ip_protocol='tcp',
+                              from_port=5043, to_port=5043)
+
     click.echo('Deleting stack: {}'.format(stack_or_name.stack_name))
     conn.delete_stack(stack_or_name.stack_name)
 
@@ -45,6 +49,29 @@ def firecares_deploy(ctx):
         click.echo(firecares_deploy.get_help(ctx))
     return ctx.invoked_subcommand
 
+
+@firecares_deploy.command()
+@click.option('--ami', default='', help='Current production AMI')
+@click.option('--keep', default=2, help='# of stacks to keep in AWS')
+def delete_old_stacks(ami, keep):
+    """
+    Delete old FireCARES webserver CloudFormation stacks from AWS.
+    """
+    _delete_old_stacks(ami, keep)
+
+
+def _delete_old_stacks(ami='', keep=2):
+    ami = ami or ''
+    conn = CloudFormationConnection()
+    # If there are old stacks, flag them for deletion
+    old_stacks = [n for n in conn.describe_stacks() if 'firecares-dev-web' in n.stack_name and ami not in n.stack_name]
+
+    # Keep 2 stacks by default so that we don't have any potential downtime
+    old_stacks = sorted(old_stacks, key=lambda x: x.creation_time, reverse=True)[keep:]
+    click.secho("Deleting {count} stacks...".format(count=len(old_stacks)))
+    for old_stack in old_stacks:
+        delete_firecares_stack(old_stack)
+    click.secho("Done")
 
 
 @firecares_deploy.command()
@@ -78,10 +105,10 @@ def deploy(ami, env, dbpass, dbuser):
 
         stack = conn.describe_stacks(stack_name_or_id=name)[0]
 
-        while stack.stack_status == 'CREATE_IN_PROGRESS':
-            click.secho('Stack creation in progress, waiting until the stack is available.')
-            time.sleep(10)
-            stack = conn.describe_stacks(stack_name_or_id=name)[0]
+    while stack.stack_status == 'CREATE_IN_PROGRESS':
+        click.secho('Stack creation in progress, waiting until the stack is available.')
+        time.sleep(10)
+        stack = conn.describe_stacks(stack_name_or_id=name)[0]
 
     db_stack = conn.describe_stacks(stack_name_or_id=db_stack)[0]
 
@@ -105,11 +132,14 @@ def deploy(ami, env, dbpass, dbuser):
         except EC2ResponseError:
             click.secho('NFIRS web security group already exists.')
 
-    # If there are old stacks, flag them for deletion.
-    old_stacks = [n for n in conn.describe_stacks() if 'firecares-dev-web' in n.stack_name and ami not in n.stack_name]
+        click.secho('Updating ELK security group with ingress from new web security group.')
+        try:
+            ec2.authorize_security_group(group_id='sg-f1ce248e', src_security_group_group_id=sg.value, ip_protocol='tcp',
+                                         from_port=5043, to_port=5043)
+        except EC2ResponseError:
+            click.sechod('ELK web security group already exists.')
 
-    for old_stack in old_stacks:
-        delete_firecares_stack(old_stack)
+    _delete_old_stacks()
 
 
 @firecares_deploy.command()

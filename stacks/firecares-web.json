@@ -1,5 +1,5 @@
 {
-    "Description": "Create FireCARES Webserver Load Balancer and Auto-Sclaing group",
+    "Description": "Create FireCARES Webserver Load Balancer and Auto-Scaling group",
     "Outputs": {
         "AMI": {
             "Description": "Web server ami image group.",
@@ -216,6 +216,12 @@
                     },
                     {
                         "CidrIp": "65.254.97.100/32",
+                        "FromPort": "22",
+                        "IpProtocol": "tcp",
+                        "ToPort": "22"
+                    },
+                    {
+                        "CidrIp": "108.66.75.162/32",
                         "FromPort": "22",
                         "IpProtocol": "tcp",
                         "ToPort": "22"

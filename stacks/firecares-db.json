@@ -200,6 +200,12 @@
                         "FromPort": "22",
                         "IpProtocol": "tcp",
                         "ToPort": "22"
+                    },
+                    {
+                        "CidrIp": "108.66.75.162/32",
+                        "FromPort": "22",
+                        "IpProtocol": "tcp",
+                        "ToPort": "22"
                     }
                 ],
                 "VpcId": {
@@ -282,6 +288,12 @@
                         "ToPort": "22"
                     },
                     {
+                        "CidrIp": "108.66.75.162/32",
+                        "FromPort": "22",
+                        "IpProtocol": "tcp",
+                        "ToPort": "22"
+                    },
+                    {
                         "CidrIp": "69.255.184.149/32",
                         "FromPort": "15672",
                         "IpProtocol": "tcp",
@@ -327,6 +339,19 @@
                             },
                             "static"
                         ]
+                    ]
+                },
+                "CorsConfiguration": {
+                    "CorsRules": [
+                        {
+                            "AllowedMethods": [
+                                "GET",
+                                "HEAD"
+                            ],
+                            "AllowedOrigins": [
+                                "https://test.firecares.org"
+                            ]
+                        }
                     ]
                 }
             },

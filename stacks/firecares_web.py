@@ -7,7 +7,7 @@ from troposphere.s3 import Bucket, PublicRead
 from troposphere.route53 import RecordSetType
 
 t = Template()
-t.add_description("Create FireCARES Webserver Load Balancer and Auto-Sclaing group")
+t.add_description("Create FireCARES Webserver Load Balancer and Auto-Scaling group")
 
 base_ami = "ami-e8b048fe"
 

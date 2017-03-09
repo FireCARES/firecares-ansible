@@ -23,3 +23,4 @@
     - base
     - web
     - celery
+    - filebeat
