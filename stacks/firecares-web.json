@@ -31,7 +31,7 @@
                     [
                         {
                             "Fn::GetAtt": [
-                                "FireCARESLoadBalancer",
+                                "LoadBalancer",
                                 "DNSName"
                             ]
                         }
@@ -131,7 +131,7 @@
         }
     },
     "Resources": {
-        "FireCARESLoadBalancer": {
+        "LoadBalancer": {
             "Properties": {
                 "AvailabilityZones": {
                     "Fn::GetAZs": ""
@@ -158,7 +158,18 @@
                         "Protocol": "HTTPS",
                         "SSLCertificateId": "arn:aws:iam::164077527722:server-certificate/firecares"
                     }
-                ]
+                ],
+                "LoadBalancerName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "firecares",
+                            {
+                                "Ref": "Environment"
+                            }
+                        ]
+                    ]
+                }
             },
             "Type": "AWS::ElasticLoadBalancing::LoadBalancer"
         },
@@ -183,20 +194,31 @@
         },
         "WebServers": {
             "Properties": {
-                "GroupDescription": "FireCARES webserver group",
+                "GroupDescription": {
+                    "Fn::Join": [
+                        " - ",
+                        [
+                            "FireCARES webserver group",
+                            {
+                                "Ref": "Environment"
+                            },
+                            "2017-03-10T01:27:35.830965+00:00"
+                        ]
+                    ]
+                },
                 "SecurityGroupIngress": [
                     {
                         "FromPort": "80",
                         "IpProtocol": "tcp",
                         "SourceSecurityGroupName": {
                             "Fn::GetAtt": [
-                                "FireCARESLoadBalancer",
+                                "LoadBalancer",
                                 "SourceSecurityGroup.GroupName"
                             ]
                         },
                         "SourceSecurityGroupOwnerId": {
                             "Fn::GetAtt": [
-                                "FireCARESLoadBalancer",
+                                "LoadBalancer",
                                 "SourceSecurityGroup.OwnerAlias"
                             ]
                         },
@@ -245,7 +267,7 @@
                 },
                 "LoadBalancerNames": [
                     {
-                        "Ref": "FireCARESLoadBalancer"
+                        "Ref": "LoadBalancer"
                     }
                 ],
                 "MaxSize": "5",

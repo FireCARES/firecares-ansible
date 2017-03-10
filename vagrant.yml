@@ -8,6 +8,7 @@
   vars:
     - setup_git_repo: yes
     - update_apt_cache: yes
+    - deployment_env: vagrant
     #- ipython_notebook: yes
 
   vars_files:

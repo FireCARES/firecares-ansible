@@ -1,0 +1,16 @@
+---
+
+- name: Provision a {{ application_name }} rabbitmq server.
+  hosts: localhost
+  sudo: yes
+  sudo_user: root
+  remote_user: ubuntu
+  vars:
+    - update_apt_cache: yes
+    - deployment_env: prod
+  vars_files:
+    - env_vars/base.yml
+    - env_vars/production_staging.yml
+  roles:
+    - base
+    - rabbitmq

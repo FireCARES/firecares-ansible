@@ -1,0 +1,22 @@
+[
+  {
+    "ParameterKey": "KeyName",
+    "ParameterValue": "firecares-prod"
+  },
+  {
+    "ParameterKey": "S3StaticAllowedCORSOrigin",
+    "ParameterValue": "https://staging.firecares.org"
+  },
+  {
+    "ParameterKey": "Environment",
+    "ParameterValue": "prod"
+  },
+  {
+    "ParameterKey": "WebServerSG",
+    "ParameterValue": "sg-b58b73ca"
+  },
+  {
+    "ParameterKey": "RabbitMQAMI",
+    "ParameterValue": "ami-defd5ec8"
+  }
+]

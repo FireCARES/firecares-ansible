@@ -1,6 +1,6 @@
 ---
 - name: Create a {{ application_name }} webserver
-  hosts: dev-webservers
+  hosts: prod-webservers
   sudo: yes
   sudo_user: root
   remote_user: ubuntu
@@ -10,11 +10,11 @@
     - run_django_sync_db: no
     - run_django_db_migrations: no
     - run_django_collectstatic: no
-    - deployment_env: dev
+    - deployment_env: prod
 
   vars_files:
     - env_vars/base.yml
-    - env_vars/development_aws.yml
+    - env_vars/production_staging.yml
 
   environment:
       AWS_ACCESS_KEY_ID: "{{ aws_access_key_id }}"

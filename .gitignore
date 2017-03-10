@@ -10,3 +10,4 @@ node_modules/
 *.pyc
 /manifest.json
 *.retry
+/tmp

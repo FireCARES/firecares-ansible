@@ -1,3 +1,5 @@
+from datetime import datetime
+from pytz import timezone
 from troposphere import Ref, Template, Parameter, GetAZs, Output, Join, GetAtt
 from troposphere.autoscaling import LaunchConfiguration, AutoScalingGroup, Tag
 from troposphere.ec2 import Instance, SecurityGroup, SecurityGroupRule
@@ -10,6 +12,8 @@ t = Template()
 t.add_description("Create FireCARES Webserver Load Balancer and Auto-Scaling group")
 
 base_ami = "ami-e8b048fe"
+
+now = datetime.utcnow().replace(tzinfo=timezone('UTC')).isoformat()
 
 key_name = t.add_parameter(Parameter(
     "KeyName",
@@ -110,9 +114,10 @@ environment = t.add_parameter(Parameter(
 ))
 
 load_balancer = t.add_resource(LoadBalancer(
-    'FireCARESLoadBalancer',
+    "LoadBalancer",
     CrossZone=True,
     AvailabilityZones=GetAZs(""),
+    LoadBalancerName=Join('-', ['firecares', Ref(environment)]),
     LBCookieStickinessPolicy=[
       {
         "PolicyName": "CookieBasedPolicy",
@@ -128,7 +133,7 @@ load_balancer = t.add_resource(LoadBalancer(
           "CookieBasedPolicy"
         ]
       },
-        {
+     {
         "LoadBalancerPort": "443",
         "InstancePort": "80",
         "Protocol": "HTTPS",
@@ -139,7 +144,7 @@ load_balancer = t.add_resource(LoadBalancer(
 
 web_sg = t.add_resource(SecurityGroup(
     "WebServers",
-    GroupDescription="FireCARES webserver group",
+    GroupDescription=Join(' - ', ["FireCARES webserver group", Ref(environment), now]),
     SecurityGroupIngress=[
         SecurityGroupRule("ELBAccess",
                           IpProtocol="tcp",
@@ -174,7 +179,7 @@ autoscaling_group = t.add_resource(AutoScalingGroup(
     MaxSize="5",
     Tags=[
         Tag("environment", Ref(environment), True),
-        Tag("Name", Join('-', ['web-server', Ref(environment)]), True)
+        Tag("Name", Join('-', ['web-server', Ref(environment), Ref(ami)]), True)
     ],
     LoadBalancerNames=[Ref(load_balancer)],
     HealthCheckType="EC2",
@@ -204,8 +209,6 @@ t.add_output([
         Value=Ref(ami),
     )
 ])
-
-
 
 if __name__ == '__main__':
     print t.to_json()

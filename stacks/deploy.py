@@ -6,6 +6,7 @@ from boto import connect_ec2
 from boto.exception import BotoServerError, EC2ResponseError
 from firecares_db import t as db_server_stack
 from firecares_web import t as web_server_stack
+from firecares_staging_db import t as db_staging_server_stack
 
 
 def get_web_security_group(stack):
@@ -51,25 +52,27 @@ def firecares_deploy(ctx):
 
 
 @firecares_deploy.command()
-@click.option('--ami', default='', help='Current production AMI')
+@click.option('--ami', help='Currently deployed AMI')
 @click.option('--keep', default=2, help='# of stacks to keep in AWS')
-def delete_old_stacks(ami, keep):
+@click.option('--env', default='dev', help='Environment (dev/prod)')
+def delete_old_stacks(ami, keep, env):
     """
     Delete old FireCARES webserver CloudFormation stacks from AWS.
     """
-    _delete_old_stacks(ami, keep)
+    _delete_old_stacks(ami, keep, env)
 
 
-def _delete_old_stacks(ami='', keep=2):
-    ami = ami or ''
+def _delete_old_stacks(ami=None, keep=2, env='dev'):
     conn = CloudFormationConnection()
     # If there are old stacks, flag them for deletion
-    old_stacks = [n for n in conn.describe_stacks() if 'firecares-dev-web' in n.stack_name and ami not in n.stack_name]
+    name = 'firecares-{}-web'.format(env)
+    old_stacks = [n for n in conn.describe_stacks() if name in n.stack_name and (not ami or ami not in n.stack_name)]
 
     # Keep 2 stacks by default so that we don't have any potential downtime
     old_stacks = sorted(old_stacks, key=lambda x: x.creation_time, reverse=True)[keep:]
     click.secho("Deleting {count} stacks...".format(count=len(old_stacks)))
     for old_stack in old_stacks:
+        click.secho("Deleteing {stack}".format(old_stack.stack_name))
         delete_firecares_stack(old_stack)
     click.secho("Done")
 
@@ -79,7 +82,8 @@ def _delete_old_stacks(ami='', keep=2):
 @click.option('--env', default='dev', help='Environment')
 @click.option('--dbpass', help='Database password from firecares-db stack.')
 @click.option('--dbuser', help='Database user from firecares-db stack.')
-def deploy(ami, env, dbpass, dbuser):
+@click.option('--s3cors', default='*', help='S3 CORS allowed hosts')
+def deploy(ami, env, dbpass, dbuser, s3cors):
     """
     Deploys a firecares environment.
 
@@ -91,7 +95,7 @@ def deploy(ami, env, dbpass, dbuser):
     db_stack = '-'.join(['firecares', env])
     key_name = '-'.join(['firecares', env])
 
-    name = 'firecares-dev-web-{}'.format(ami)
+    name = 'firecares-{}-web-{}'.format(env, ami)
     try:
         stack = conn.describe_stacks(stack_name_or_id=name)[0]
 
@@ -101,7 +105,8 @@ def deploy(ami, env, dbpass, dbuser):
                           template_body=web_server_stack.to_json(),
                           parameters=[
                               ('KeyName', key_name),
-                              ('baseAmi', ami)])
+                              ('baseAmi', ami),
+                              ('Environment', env)])
 
         stack = conn.describe_stacks(stack_name_or_id=name)[0]
 
@@ -116,14 +121,21 @@ def deploy(ami, env, dbpass, dbuser):
 
     if sg:
         click.secho('Updating database security group with ingress from new web security group.')
-        conn.update_stack(db_stack.stack_name,
-                          template_body=db_server_stack.to_json(),
-                          parameters=[
-                              ('WebServerSG', sg.value),
-                              ('DBUser', dbuser, True),
-                              ('DBPassword', dbpass, True),
-                              ('KeyName', 'firecares-dev', True)])
 
+        db_params = [
+            ('WebServerSG', sg.value),
+            ('KeyName', 'firecares-{}'.format(env), True),
+            ('Environment', env),
+            ('S3StaticAllowedCORSOrigin', s3cors)]
+        db_stack = db_staging_server_stack
+
+        if env != 'prod':
+            db_params.extend([('DBUser', dbuser, True), ('DBPassword', dbpass, True)])
+            db_stack = db_server_stack
+
+        conn.update_stack(db_stack.stack_name,
+                          template_body=db_stack.to_json(),
+                          parameters=db_params)
 
         click.secho('Updating NFIRS database security group with ingress from new web security group.')
         try:
@@ -137,7 +149,7 @@ def deploy(ami, env, dbpass, dbuser):
             ec2.authorize_security_group(group_id='sg-f1ce248e', src_security_group_group_id=sg.value, ip_protocol='tcp',
                                          from_port=5043, to_port=5043)
         except EC2ResponseError:
-            click.sechod('ELK web security group already exists.')
+            click.secho('ELK web security group already exists.')
 
     _delete_old_stacks()
 

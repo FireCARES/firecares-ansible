@@ -9,9 +9,9 @@
     "secret_key": "{{user `aws_secret_key`}}",
     "region": "us-east-1",
     "source_ami": "ami-d05e75b8",
-    "instance_type": "t2.micro",
+    "instance_type": "t2.small",
     "ssh_username": "ubuntu",
-    "ami_name": "rabbit-mq-{{timestamp}}"
+    "ami_name": "webserver-prod-{{timestamp}}"
   }],
   "provisioners": [
         {
@@ -21,16 +21,28 @@
                 "sleep 30",
                 "apt-add-repository ppa:rquillo/ansible",
                 "/usr/bin/apt-get update",
-                "/usr/bin/apt-get -y install ansible"
+                "/usr/bin/apt-get -y install openssl libssl-dev libssl-doc build-essential libffi-dev python-dev python-pip",
+                "pip install ansible==1.9.4",
+                "sudo dd if=/dev/zero of=/var/swap.img bs=1M count=1024",
+                "sudo mkswap /var/swap.img",
+                "sudo swapon /var/swap.img",
+                "sudo echo \"/var/swap.img  swap       swap    defaults        0 0\" >> /etc/fstab"
             ]
         },
         {
             "type": "ansible-local",
             "playbook_dir": ".",
-            "playbook_file": "rabbitmq-dev-packer.yml",
+            "playbook_file": "webservers-prod-packer.yml",
             "role_paths": [
                 "roles/"
             ]
         }
-    ]
+    ],
+  "post-processors": [
+      {
+      "type": "manifest",
+      "output": "manifest.json",
+      "strip_path": true
+    }
+  ]
 }

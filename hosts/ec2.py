@@ -125,6 +125,7 @@ import argparse
 import re
 from time import time
 import boto
+from dateutil import parser
 from boto import ec2
 from boto import rds
 from boto import elasticache
@@ -554,10 +555,14 @@ class Ec2Inventory(object):
             for tag in tags:
                 tags_by_instance_id[tag.res_id][tag.name] = tag.value
 
-            for reservation in reservations:
-                for instance in reservation.instances:
-                    instance.tags = tags_by_instance_id[instance.id]
-                    self.add_instance(instance, region)
+            all_instances = [instance for reservation in reservations for instance in reservation.instances]
+
+            # Force most recently launched instances to the top of the lists
+            all_instances = sorted(all_instances, key=lambda x: parser.parse(x.launch_time), reverse=True)
+
+            for instance in all_instances:
+                instance.tags = tags_by_instance_id[instance.id]
+                self.add_instance(instance, region)
 
         except boto.exception.BotoServerError as e:
             if e.error_code == 'AuthFailure':

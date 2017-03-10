@@ -1,0 +1,259 @@
+{
+    "Description": "Create a FireCARES Instance",
+    "Outputs": {
+        "RabbitMQIP": {
+            "Description": "RabbitMQ's Elastic IP",
+            "Value": {
+                "Ref": "RabbitMQEIP"
+            }
+        },
+        "WebServerSecurityGroup": {
+            "Description": "WebserverSecurityGroup",
+            "Value": {
+                "Ref": "WebServerSG"
+            }
+        }
+    },
+    "Parameters": {
+        "Environment": {
+            "Default": "dev",
+            "Description": "Stack environment (e.g. prod, dev, int)",
+            "MaxLength": "12",
+            "MinLength": "1",
+            "Type": "String"
+        },
+        "KeyName": {
+            "ConstraintDescription": "Must be the name of an existing EC2 KeyPair.",
+            "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "RabbitInstanceClass": {
+            "AllowedValues": [
+                "t1.micro",
+                "t2.nano",
+                "t2.micro",
+                "t2.small",
+                "t2.medium",
+                "t2.large",
+                "m1.small",
+                "m1.medium",
+                "m1.large",
+                "m1.xlarge",
+                "m2.xlarge",
+                "m2.2xlarge",
+                "m2.4xlarge",
+                "m3.medium",
+                "m3.large",
+                "m3.xlarge",
+                "m3.2xlarge",
+                "m4.large",
+                "m4.xlarge",
+                "m4.2xlarge",
+                "m4.4xlarge",
+                "m4.10xlarge",
+                "c1.medium",
+                "c1.xlarge",
+                "c3.large",
+                "c3.xlarge",
+                "c3.2xlarge",
+                "c3.4xlarge",
+                "c3.8xlarge",
+                "c4.large",
+                "c4.xlarge",
+                "c4.2xlarge",
+                "c4.4xlarge",
+                "c4.8xlarge",
+                "g2.2xlarge",
+                "g2.8xlarge",
+                "r3.large",
+                "r3.xlarge",
+                "r3.2xlarge",
+                "r3.4xlarge",
+                "r3.8xlarge",
+                "i2.xlarge",
+                "i2.2xlarge",
+                "i2.4xlarge",
+                "i2.8xlarge",
+                "d2.xlarge",
+                "d2.2xlarge",
+                "d2.4xlarge",
+                "d2.8xlarge",
+                "hi1.4xlarge",
+                "hs1.8xlarge",
+                "cr1.8xlarge",
+                "cc2.8xlarge",
+                "cg1.4xlarge"
+            ],
+            "ConstraintDescription": "must be a valid EC2 instance type.",
+            "Default": "t2.small",
+            "Description": "RabbitMQ EC2 instance type",
+            "Type": "String"
+        },
+        "RabbitMQAMI": {
+            "Description": "AMI ID of an existing RabbitMQ AMI",
+            "Type": "String"
+        },
+        "S3StaticAllowedCORSOrigin": {
+            "ConstraintDescription": "Must be a set of origins (including scheme://host)",
+            "Description": "Name of the allowed origins for accessing the static FireCARES S3 bucket",
+            "Type": "CommaDelimitedList"
+        },
+        "VpcId": {
+            "ConstraintDescription": "must be an existing VPC name.",
+            "Default": "vpc-fc94c499",
+            "Description": "Name of an existing vpc",
+            "Type": "String"
+        },
+        "WebServerSG": {
+            "ConstraintDescription": "Must be the name of an existing security group",
+            "Default": "sg-ee029092",
+            "Description": "The GroupID of the Webserver Security Group",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "DocumentUploadBucket": {
+            "Properties": {
+                "AccessControl": "PublicRead",
+                "BucketName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "firecares-uploads",
+                            {
+                                "Ref": "Environment"
+                            }
+                        ]
+                    ]
+                }
+            },
+            "Type": "AWS::S3::Bucket"
+        },
+        "Ec2Instance": {
+            "Properties": {
+                "ImageId": {
+                    "Ref": "RabbitMQAMI"
+                },
+                "InstanceType": {
+                    "Ref": "RabbitInstanceClass"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroups": [
+                    {
+                        "Ref": "RabbitMQ"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    "rabbitmq",
+                                    {
+                                        "Ref": "Environment"
+                                    }
+                                ]
+                            ]
+                        }
+                    }
+                ]
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "RabbitMQ": {
+            "Properties": {
+                "GroupDescription": "rabbitmq-sg-ingress - 2017-03-09T22:15:31.452275+00:00",
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "54.173.150.226/32",
+                        "FromPort": "22",
+                        "IpProtocol": "tcp",
+                        "ToPort": "22"
+                    },
+                    {
+                        "CidrIp": "69.255.184.149/32",
+                        "FromPort": "22",
+                        "IpProtocol": "tcp",
+                        "ToPort": "22"
+                    },
+                    {
+                        "CidrIp": "65.254.97.100/32",
+                        "FromPort": "22",
+                        "IpProtocol": "tcp",
+                        "ToPort": "22"
+                    },
+                    {
+                        "CidrIp": "108.66.75.162/32",
+                        "FromPort": "22",
+                        "IpProtocol": "tcp",
+                        "ToPort": "22"
+                    },
+                    {
+                        "CidrIp": "69.255.184.149/32",
+                        "FromPort": "15672",
+                        "IpProtocol": "tcp",
+                        "ToPort": "15672"
+                    },
+                    {
+                        "CidrIp": "69.255.184.149/32",
+                        "FromPort": "5672",
+                        "IpProtocol": "tcp",
+                        "ToPort": "5672"
+                    },
+                    {
+                        "FromPort": "5672",
+                        "IpProtocol": "tcp",
+                        "SourceSecurityGroupId": {
+                            "Ref": "WebServerSG"
+                        },
+                        "ToPort": "5672"
+                    }
+                ]
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "RabbitMQEIP": {
+            "Properties": {
+                "Domain": "vpc",
+                "InstanceId": {
+                    "Ref": "Ec2Instance"
+                }
+            },
+            "Type": "AWS::EC2::EIP"
+        },
+        "StaticBucket": {
+            "Properties": {
+                "AccessControl": "PublicRead",
+                "BucketName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "firecares-static",
+                            {
+                                "Ref": "Environment"
+                            }
+                        ]
+                    ]
+                },
+                "CorsConfiguration": {
+                    "CorsRules": [
+                        {
+                            "AllowedMethods": [
+                                "GET",
+                                "HEAD"
+                            ],
+                            "AllowedOrigins": {
+                                "Ref": "S3StaticAllowedCORSOrigin"
+                            }
+                        }
+                    ]
+                }
+            },
+            "Type": "AWS::S3::Bucket"
+        }
+    }
+}

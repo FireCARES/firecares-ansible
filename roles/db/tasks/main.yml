@@ -62,4 +62,3 @@
                    role_attr_flags=SUPERUSER
                    state=present
   when: ansible_ssh_user == "vagrant"
-

@@ -1,5 +1,7 @@
 ---
 
+deployment_env: dev
+
 git_repo: /firecares
 
 project_name: firecares
