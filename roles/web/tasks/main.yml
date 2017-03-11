@@ -1,9 +1,5 @@
 ---
 
-- name: Set hostname
-  shell: hostname {{ application_name }}-`hostname`
-  when: set_hostname | default('no') | bool
-
 - include: install_additional_packages.yml
   tags: packages
 

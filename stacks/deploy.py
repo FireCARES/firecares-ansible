@@ -80,10 +80,11 @@ def _delete_old_stacks(ami=None, keep=2, env='dev'):
 @firecares_deploy.command()
 @click.option('--ami', default='AMI', help='AMI to deploy')
 @click.option('--env', default='dev', help='Environment')
+@click.option('--commithash', help='The hash of the commit used to generate the AMI')
 @click.option('--dbpass', help='Database password from firecares-db stack.')
 @click.option('--dbuser', help='Database user from firecares-db stack.')
 @click.option('--s3cors', default='*', help='S3 CORS allowed hosts')
-def deploy(ami, env, dbpass, dbuser, s3cors):
+def deploy(ami, env, commithash, dbpass, dbuser, s3cors):
     """
     Deploys a firecares environment.
 
@@ -95,7 +96,7 @@ def deploy(ami, env, dbpass, dbuser, s3cors):
     db_stack = '-'.join(['firecares', env])
     key_name = '-'.join(['firecares', env])
 
-    name = 'firecares-{}-web-{}'.format(env, ami)
+    name = 'firecares-{}-web-{}'.format(env, commithash)
     try:
         stack = conn.describe_stacks(stack_name_or_id=name)[0]
 
@@ -106,7 +107,8 @@ def deploy(ami, env, dbpass, dbuser, s3cors):
                           parameters=[
                               ('KeyName', key_name),
                               ('baseAmi', ami),
-                              ('Environment', env)])
+                              ('Environment', env),
+                              ('CommitHash', commithash)])
 
         stack = conn.describe_stacks(stack_name_or_id=name)[0]
 
@@ -127,14 +129,14 @@ def deploy(ami, env, dbpass, dbuser, s3cors):
             ('KeyName', 'firecares-{}'.format(env), True),
             ('Environment', env),
             ('S3StaticAllowedCORSOrigin', s3cors)]
-        db_stack = db_staging_server_stack
+        deploy_stack = db_staging_server_stack
 
         if env != 'prod':
             db_params.extend([('DBUser', dbuser, True), ('DBPassword', dbpass, True)])
-            db_stack = db_server_stack
+            deploy_stack = db_server_stack
 
         conn.update_stack(db_stack.stack_name,
-                          template_body=db_stack.to_json(),
+                          template_body=deploy_stack.to_json(),
                           parameters=db_params)
 
         click.secho('Updating NFIRS database security group with ingress from new web security group.')

@@ -40,6 +40,12 @@ web_capacity = t.add_parameter(Parameter(
     MaxValue="5",
 ))
 
+commit = t.add_parameter(Parameter(
+    "CommitHash",
+    Description="Commit hash used for building the web VM",
+    Type="String"
+))
+
 web_instance_class = t.add_parameter(Parameter(
     "WebInstanceClass",
     Default="t2.small",
@@ -117,7 +123,7 @@ load_balancer = t.add_resource(LoadBalancer(
     "LoadBalancer",
     CrossZone=True,
     AvailabilityZones=GetAZs(""),
-    LoadBalancerName=Join('-', ['firecares', Ref(environment)]),
+    LoadBalancerName=Join('-', ['firecares', Ref(environment), Ref(commit)]),
     LBCookieStickinessPolicy=[
       {
         "PolicyName": "CookieBasedPolicy",
@@ -144,7 +150,7 @@ load_balancer = t.add_resource(LoadBalancer(
 
 web_sg = t.add_resource(SecurityGroup(
     "WebServers",
-    GroupDescription=Join(' - ', ["FireCARES webserver group", Ref(environment), now]),
+    GroupDescription=Join(' - ', ["FireCARES webserver group", Ref(environment), Ref(commit)]),
     SecurityGroupIngress=[
         SecurityGroupRule("ELBAccess",
                           IpProtocol="tcp",
@@ -179,7 +185,8 @@ autoscaling_group = t.add_resource(AutoScalingGroup(
     MaxSize="5",
     Tags=[
         Tag("environment", Ref(environment), True),
-        Tag("Name", Join('-', ['web-server', Ref(environment), Ref(ami)]), True)
+        Tag("Name", Join('-', ['web-server', Ref(environment), Ref(commit)]), True),
+        Tag("Group", Join('-', ['web-server', Ref(environment)]), True)
     ],
     LoadBalancerNames=[Ref(load_balancer)],
     HealthCheckType="EC2",
