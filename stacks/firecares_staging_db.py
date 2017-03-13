@@ -10,7 +10,7 @@ from troposphere.s3 import Bucket, PublicRead, CorsConfiguration, CorsRules
 t = Template()
 t.add_description("Create a FireCARES Instance")
 
-base_ami = "ami-d05e75b8"
+base_ami = "ami-d0d57ac6"
 
 now = datetime.utcnow().replace(tzinfo=timezone('UTC')).isoformat()
 
@@ -120,12 +120,13 @@ environment = t.add_parameter(Parameter(
 
 rabbit_mq_sg = t.add_resource(SecurityGroup(
     "RabbitMQ",
-    GroupDescription="rabbitmq-sg-ingress - {}".format(now),
+    GroupDescription="rabbitmq-sg-ingress",
     SecurityGroupIngress=[
         SecurityGroupRule("JenkinsAccess", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="54.173.150.226/32"),
         SecurityGroupRule("TylerAccess", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="69.255.184.149/32"),
         SecurityGroupRule("JoeAccess", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="65.254.97.100/32"),
         SecurityGroupRule("JoeAccess2", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="108.66.75.162/32"),
+        SecurityGroupRule("JoeAccessWeb", IpProtocol="tcp", FromPort="15672", ToPort="15672", CidrIp="65.254.97.100/32"),
         SecurityGroupRule("JoeAccess2Web", IpProtocol="tcp", FromPort="15672", ToPort="15672", CidrIp="108.66.75.162/32"),
         SecurityGroupRule("RabbitMQWeb", IpProtocol="tcp", FromPort="15672", ToPort="15672", CidrIp="69.255.184.149/32"),
         SecurityGroupRule("RabbitMQ", IpProtocol="tcp", FromPort="5672", ToPort="5672", CidrIp="69.255.184.149/32"),

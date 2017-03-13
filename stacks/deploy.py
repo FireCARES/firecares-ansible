@@ -72,7 +72,7 @@ def _delete_old_stacks(ami=None, keep=2, env='dev'):
     old_stacks = sorted(old_stacks, key=lambda x: x.creation_time, reverse=True)[keep:]
     click.secho("Deleting {count} stacks...".format(count=len(old_stacks)))
     for old_stack in old_stacks:
-        click.secho("Deleteing {stack}".format(old_stack.stack_name))
+        click.secho("Deleteing {}".format(old_stack.stack_name))
         delete_firecares_stack(old_stack)
     click.secho("Done")
 
@@ -97,6 +97,7 @@ def deploy(ami, env, commithash, dbpass, dbuser, s3cors):
     key_name = '-'.join(['firecares', env])
 
     name = 'firecares-{}-web-{}'.format(env, commithash)
+
     try:
         stack = conn.describe_stacks(stack_name_or_id=name)[0]
 
@@ -135,6 +136,8 @@ def deploy(ami, env, commithash, dbpass, dbuser, s3cors):
             db_params.extend([('DBUser', dbuser, True), ('DBPassword', dbpass, True)])
             deploy_stack = db_server_stack
 
+        open('/tmp/wtf.json', 'w').write(deploy_stack.to_json())
+
         conn.update_stack(db_stack.stack_name,
                           template_body=deploy_stack.to_json(),
                           parameters=db_params)
@@ -153,7 +156,7 @@ def deploy(ami, env, commithash, dbpass, dbuser, s3cors):
         except EC2ResponseError:
             click.secho('ELK web security group already exists.')
 
-    _delete_old_stacks()
+    _delete_old_stacks(ami=ami, env=env)
 
 
 @firecares_deploy.command()

@@ -15,13 +15,13 @@ dev-rabbitmq
 dev-webservers
 
 [tag_Name_rabbitmq_prod]
-[tag_Name_web_server_prod]
+[tag_Group_web_server_prod]
 
 [prod-rabbitmq:children]
 tag_Name_rabbitmq_prod
 
 [prod-webservers:children]
-tag_Name_web_server_prod
+tag_Group_web_server_prod
 
 [prod:children]
 prod-rabbitmq

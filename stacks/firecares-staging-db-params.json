@@ -14,9 +14,5 @@
   {
     "ParameterKey": "WebServerSG",
     "ParameterValue": "sg-b58b73ca"
-  },
-  {
-    "ParameterKey": "RabbitMQAMI",
-    "ParameterValue": "ami-defd5ec8"
   }
 ]

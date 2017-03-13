@@ -11,7 +11,7 @@ from troposphere.route53 import RecordSetType
 t = Template()
 t.add_description("Create FireCARES Webserver Load Balancer and Auto-Scaling group")
 
-base_ami = "ami-e8b048fe"
+base_ami = "ami-7646e460"
 
 now = datetime.utcnow().replace(tzinfo=timezone('UTC')).isoformat()
 
