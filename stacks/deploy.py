@@ -136,8 +136,6 @@ def deploy(ami, env, commithash, dbpass, dbuser, s3cors):
             db_params.extend([('DBUser', dbuser, True), ('DBPassword', dbpass, True)])
             deploy_stack = db_server_stack
 
-        open('/tmp/wtf.json', 'w').write(deploy_stack.to_json())
-
         conn.update_stack(db_stack.stack_name,
                           template_body=deploy_stack.to_json(),
                           parameters=db_params)
