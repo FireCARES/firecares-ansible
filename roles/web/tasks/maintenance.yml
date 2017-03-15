@@ -7,9 +7,35 @@
     creates: maintenance_on.html
   tags: maintenance_mode_on
 
+- name: Turn off beats
+  service: name={{ item }} state=stopped
+  with_items:
+    - filebeat
+  tags: maintenance_mode_on
+
+- name: Turn off supervisor services
+  supervisorctl: name={{ item }} state=stopped
+  with_items:
+    - "{{ celery_application_name }}"
+    - "{{ application_name }}"
+  tags: maintenance_mode_on
+
 - name: Disable FireCARES maintenance mode
   shell: mv maintenance_on.html maintenance_off.html
   args:
     chdir: /webapps/firecares/
     creates: maintenance_off.html
+  tags: maintenance_mode_off
+
+- name: Turn beats back on
+  service: name={{ item }} state=started
+  with_items:
+    - filebeat
+  tags: maintenance_mode_off
+
+- name: Turn supervisor services back on
+  supervisorctl: name={{ item }} state=started
+  with_items:
+    - "{{ celery_application_name }}"
+    - "{{ application_name }}"
   tags: maintenance_mode_off
