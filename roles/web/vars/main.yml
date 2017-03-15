@@ -67,6 +67,3 @@ django_environment:
   DOCUMENT_UPLOAD_BUCKET: "{{ document_upload_bucket }}"
   HELIX_SECRET: "{{ helix_secret|default(omit) }}"
   COMPRESS_URL: "{{ compress_url|default(omit) }}"
-  ELASTICSEARCH_HOST: "{{ elasticsearch_host|default(omit) }}"
-  ELASTICSEARCH_PORT: "{{ elasticsearch_port|default(omit) }}"
-  ELASTICSEARCH_LEVEL: "{{ elasticsearch_level|default(omit) }}"

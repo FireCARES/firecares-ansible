@@ -58,9 +58,9 @@ MAINT_HOSTS=$(python hosts/ec2.py | python to_inventory.py tag_Group_web_server_
 if [ "$MAINT_HOSTS" != "" ]; then
   echo Hosts to apply maintenance mode: $MAINT_HOSTS
   if [ "$PRIVATE_KEY_FILE" != "" ]; then
-    ansible-playbook -v -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
+    ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
   else
-    ansible-playbook -v -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
+    ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
   fi
 else
   echo No hosts need to be set to maintenance mode, skipping...
@@ -71,8 +71,8 @@ NEW_HOSTS=$(python hosts/ec2.py | python to_inventory.py $CURRENT_TAG)
 echo New web IP addresses: $NEW_HOSTS
 FIRST_NEW_HOST=$(echo $NEW_HOSTS | cut -d, -f 1)
 echo Host to run collectstatic/migrations on: $FIRST_NEW_HOST
-echo Sleeping for 20 seconds while we wait for SSH to open up on the new host...
-sleep 20
+echo Sleeping for 60 seconds while we wait for SSH to open up on the new host...
+sleep 60
 
 if [ "$PRIVATE_KEY_FILE" != "" ]; then
   ansible-playbook -v -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes" --private-key=$PRIVATE_KEY_FILE --limit $CURRENT_TAG
