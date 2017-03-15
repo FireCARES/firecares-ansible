@@ -31,16 +31,23 @@ HASH=$(cat $TMP/commit_hash.txt)
 
 echo "Using commit hash: ${HASH}"
 
-$PACKER build -machine-readable -color=false -var "commit=${HASH}" webserver-${DEPLOY_ENV}-packer.json | tee $TMP/packerlog.txt
-cat $TMP/packerlog.txt | sed -n 's/^.*amazon-ebs,artifact.*AMIs were created.*\(ami.*\)$/\1/gp' > $TMP/current_ami.txt
+EXISTING_AMI=$(aws ec2 describe-images --owners self --filters "Name=name,Values=webserver-${DEPLOY_ENV}-${HASH}")
 
-# Check ami length, if 0 then abort
-if [ $(wc -c < "$TMP/current_ami.txt") -eq 0 ]; then
-  echo "AMI build failure, bailing..."
-  exit 1
+if [ "$(echo $EXISTING_AMI | wc -w)" -lt 10 ]; then
+  echo "AMI for webserver-${DEPLOY_ENV}-${HASH} not found...creating"
+  $PACKER build -machine-readable -color=false -var "commit=${HASH}" webserver-${DEPLOY_ENV}-packer.json | tee $TMP/packerlog.txt
+  cat $TMP/packerlog.txt | sed -n 's/^.*amazon-ebs,artifact.*AMIs were created.*\(ami.*\)$/\1/gp' > $TMP/current_ami.txt
+  # Check ami length, if 0 then abort
+  if [ $(wc -c < "$TMP/current_ami.txt") -eq 0 ]; then
+    echo "AMI build failure, bailing..."
+    exit 1
+  fi
+
+  AMI=$(cat $TMP/current_ami.txt)
+else
+  AMI=$(echo $EXISTING_AMI | python -c "import json,sys;j=json.load(sys.stdin);print j['Images'][0]['ImageId']")
+  echo "Re-deploying using existing AMI"
 fi
-
-AMI=$(cat $TMP/current_ami.txt)
 
 echo AMI id: $AMI
 
@@ -58,9 +65,9 @@ MAINT_HOSTS=$(python hosts/ec2.py | python to_inventory.py tag_Group_web_server_
 if [ "$MAINT_HOSTS" != "" ]; then
   echo Hosts to apply maintenance mode: $MAINT_HOSTS
   if [ "$PRIVATE_KEY_FILE" != "" ]; then
-    ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
+    ansible-playbook -v -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
   else
-    ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
+    ansible-playbook -v -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
   fi
 else
   echo No hosts need to be set to maintenance mode, skipping...
@@ -71,13 +78,28 @@ NEW_HOSTS=$(python hosts/ec2.py | python to_inventory.py $CURRENT_TAG)
 echo New web IP addresses: $NEW_HOSTS
 FIRST_NEW_HOST=$(echo $NEW_HOSTS | cut -d, -f 1)
 echo Host to run collectstatic/migrations on: $FIRST_NEW_HOST
-echo Sleeping for 60 seconds while we wait for SSH to open up on the new host...
-sleep 60
+echo Waiting for SSH to open...
 
 if [ "$PRIVATE_KEY_FILE" != "" ]; then
-  ansible-playbook -v -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes" --private-key=$PRIVATE_KEY_FILE --limit $CURRENT_TAG
+  SSH_CMD="ssh -i $PRIVATE_KEY_FILE -o ConnectTimeout=5 ubuntu@$FIRST_NEW_HOST exit 2>&1"
 else
-  ansible-playbook -v -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes" --limit $CURRENT_TAG
+  SSH_CMD="ssh -o ConnectTimeout=5 ubuntu@$FIRST_NEW_HOST exit 2>&1"
+fi
+
+eval $SSH_CMD
+OPEN=$?
+
+while [ "$OPEN" -gt 0 ]; do
+  eval $SSH_CMD
+  OPEN=$?
+  echo SSH not open on $FIRST_NEW_HOST
+  sleep 20
+done
+
+if [ "$PRIVATE_KEY_FILE" != "" ]; then
+  ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes" --private-key=$PRIVATE_KEY_FILE --limit "$CURRENT_TAG"
+else
+  ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes" --limit "$CURRENT_TAG"
 fi
 
 # Now, we can switch DNS over

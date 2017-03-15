@@ -136,9 +136,12 @@ def deploy(ami, env, commithash, dbpass, dbuser, s3cors):
             db_params.extend([('DBUser', dbuser, True), ('DBPassword', dbpass, True)])
             deploy_stack = db_server_stack
 
-        conn.update_stack(db_stack.stack_name,
-                          template_body=deploy_stack.to_json(),
-                          parameters=db_params)
+        try:
+            conn.update_stack(db_stack.stack_name,
+                              template_body=deploy_stack.to_json(),
+                              parameters=db_params)
+        except BotoServerError:
+            click.secho('Stack already updated.')
 
         click.secho('Updating NFIRS database security group with ingress from new web security group.')
         try:
