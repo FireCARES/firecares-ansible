@@ -81,9 +81,9 @@ echo Host to run collectstatic/migrations on: $FIRST_NEW_HOST
 echo Waiting for SSH to open...
 
 if [ "$PRIVATE_KEY_FILE" != "" ]; then
-  SSH_CMD="ssh -i $PRIVATE_KEY_FILE -o ConnectTimeout=5 ubuntu@$FIRST_NEW_HOST exit 2>&1"
+  SSH_CMD="ssh -i $PRIVATE_KEY_FILE -o ConnectTimeout=5 -o StrictHostKeyChecking=no ubuntu@$FIRST_NEW_HOST exit 2>&1"
 else
-  SSH_CMD="ssh -o ConnectTimeout=5 ubuntu@$FIRST_NEW_HOST exit 2>&1"
+  SSH_CMD="ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no ubuntu@$FIRST_NEW_HOST exit 2>&1"
 fi
 
 eval $SSH_CMD
