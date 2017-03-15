@@ -65,9 +65,9 @@ MAINT_HOSTS=$(python hosts/ec2.py | python to_inventory.py tag_Group_web_server_
 if [ "$MAINT_HOSTS" != "" ]; then
   echo Hosts to apply maintenance mode: $MAINT_HOSTS
   if [ "$PRIVATE_KEY_FILE" != "" ]; then
-    ansible-playbook -v -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
+    ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
   else
-    ansible-playbook -v -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
+    ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
   fi
 else
   echo No hosts need to be set to maintenance mode, skipping...
