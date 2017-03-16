@@ -1,0 +1,4 @@
+---
+
+logstash_host: 192.168.33.1
+logstash_port: 5044

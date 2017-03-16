@@ -1,0 +1,7 @@
+---
+
+- include: install_metricbeat.yml
+  tags: metricbeat
+
+- include: configure_metricbeat.yml
+  tags: metricbeat

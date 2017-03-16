@@ -30,6 +30,13 @@ server {
         return 200;
     }
 
+    location /server-status {
+        stub_status on;
+        access_log off;
+        allow 127.0.0.1;
+        deny all;
+    }
+
     {% if aws_s3_custom_domain %}
 
     location /static/ {

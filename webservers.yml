@@ -17,3 +17,4 @@
     - web
     - celery
     - filebeat
+    - metricbeat

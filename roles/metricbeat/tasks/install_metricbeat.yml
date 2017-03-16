@@ -1,0 +1,23 @@
+---
+
+- name: Install Elastic apt key
+  apt_key:
+    url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    state: present
+
+- name: Add Elastic apt repo
+  apt_repository:
+    repo: deb https://artifacts.elastic.co/packages/5.x/apt stable main
+    state: present
+
+- name: Install Metricbeat
+  apt:
+    name: metricbeat
+    update_cache: yes
+    state: present
+
+- name: Start Metricbeat
+  service:
+    name: metricbeat
+    state: started
+    enabled: yes

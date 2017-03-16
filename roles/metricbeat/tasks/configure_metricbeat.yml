@@ -1,0 +1,9 @@
+---
+
+- name: Setup metricbeat
+  template:
+    src: metricbeat.full.yml
+    dest: /etc/metricbeat/metricbeat.yml
+    backup: yes
+  notify:
+    - restart metricbeat
