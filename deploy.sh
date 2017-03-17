@@ -86,6 +86,7 @@ else
   SSH_CMD="ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no ubuntu@$FIRST_NEW_HOST exit 2>&1"
 fi
 
+set +e
 eval $SSH_CMD
 OPEN=$?
 
@@ -95,6 +96,8 @@ while [ "$OPEN" -gt 0 ]; do
   echo SSH not open on $FIRST_NEW_HOST
   sleep 20
 done
+
+set -e
 
 if [ "$PRIVATE_KEY_FILE" != "" ]; then
   ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes" --private-key=$PRIVATE_KEY_FILE --limit "$CURRENT_TAG"
