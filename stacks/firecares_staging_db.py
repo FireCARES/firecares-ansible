@@ -10,9 +10,7 @@ from troposphere.s3 import Bucket, PublicRead, CorsConfiguration, CorsRules
 t = Template()
 t.add_description("Create a FireCARES Instance")
 
-base_ami = "ami-d0d57ac6"
-
-now = datetime.utcnow().replace(tzinfo=timezone('UTC')).isoformat()
+base_ami = "ami-a9d761bf"
 
 key_name = t.add_parameter(Parameter(
     "KeyName",

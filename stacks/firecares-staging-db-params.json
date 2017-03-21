@@ -5,7 +5,7 @@
   },
   {
     "ParameterKey": "S3StaticAllowedCORSOrigin",
-    "ParameterValue": "https://firecares.org"
+    "ParameterValue": "*"
   },
   {
     "ParameterKey": "Environment",
