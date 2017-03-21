@@ -52,8 +52,10 @@ fi
 echo AMI id: $AMI
 
 if [ "$DBUSER" != "" ]; then
+  echo python stacks/deploy.py deploy --env $DEPLOY_ENV --s3cors $URL --ami $AMI --commithash $HASH --dbpass $DBPASS --dbuser $DBUSER
   python stacks/deploy.py deploy --env $DEPLOY_ENV --s3cors $URL --ami $AMI --commithash $HASH --dbpass $DBPASS --dbuser $DBUSER
 else
+  echo python stacks/deploy.py deploy --env $DEPLOY_ENV --s3cors $URL --ami $AMI --commithash $HASH
   python stacks/deploy.py deploy --env $DEPLOY_ENV --s3cors $URL --ami $AMI --commithash $HASH
 fi
 
@@ -65,8 +67,10 @@ MAINT_HOSTS=$(python hosts/ec2.py | python to_inventory.py tag_Group_web_server_
 if [ "$MAINT_HOSTS" != "" ]; then
   echo Hosts to apply maintenance mode: $MAINT_HOSTS
   if [ "$PRIVATE_KEY_FILE" != "" ]; then
+    echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
     ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
   else
+    echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
     ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
   fi
 else
@@ -100,8 +104,10 @@ done
 set -e
 
 if [ "$PRIVATE_KEY_FILE" != "" ]; then
+  echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes" --private-key=$PRIVATE_KEY_FILE --limit "$CURRENT_TAG"
   ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes" --private-key=$PRIVATE_KEY_FILE --limit "$CURRENT_TAG"
 else
+  echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes" --limit "$CURRENT_TAG"
   ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes" --limit "$CURRENT_TAG"
 fi
 
