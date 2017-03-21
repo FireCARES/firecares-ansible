@@ -164,3 +164,9 @@ server {
         root {{ virtualenv_path }}/;
     }
 }
+
+server {
+    listen 80;
+    server_name www.firecares.org;
+    return 301 https://firecares.org$request_uri;
+}
