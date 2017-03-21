@@ -1,0 +1,11 @@
+---
+
+- name: Generate sitemap
+  django_manage:
+    command: refresh_sitemap
+    app_path: "{{ project_path }}"
+    virtualenv: "{{ virtualenv_path }}"
+    settings: "{{ django_settings_file }}"
+  environment: django_environment
+  when: generate_sitemap is defined and generate_sitemap
+  tags: django.generate_sitemap

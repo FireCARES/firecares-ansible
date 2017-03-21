@@ -104,11 +104,11 @@ done
 set -e
 
 if [ "$PRIVATE_KEY_FILE" != "" ]; then
-  echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes" --private-key=$PRIVATE_KEY_FILE --limit "$CURRENT_TAG"
-  ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes" --private-key=$PRIVATE_KEY_FILE --limit "$CURRENT_TAG"
+  echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic,django.generate_sitemap" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes, generate_sitemap=yes" --private-key=$PRIVATE_KEY_FILE --limit "$CURRENT_TAG[0]"
+  ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic,django.generate_sitemap" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes, generate_sitemap=yes" --private-key=$PRIVATE_KEY_FILE --limit "$CURRENT_TAG[0]"
 else
-  echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes" --limit "$CURRENT_TAG"
-  ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes" --limit "$CURRENT_TAG"
+  echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic,django.generate_sitemap" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes, generate_sitemap=yes" --limit "$CURRENT_TAG[0]"
+  ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic,django.generate_sitemap" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes, generate_sitemap=yes" --limit "$CURRENT_TAG[0]"
 fi
 
 # Now, we can switch DNS over

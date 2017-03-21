@@ -35,3 +35,6 @@
 
 - include: maintenance.yml
   when: maintenance_mode | default('no') | bool
+
+- include: sitemap.yml
+  tags: sitemap

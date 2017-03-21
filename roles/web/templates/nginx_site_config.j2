@@ -51,18 +51,30 @@ server {
         proxy_pass http://{{aws_s3_custom_domain}}/;
     }
 
+    location /sitemap.xml {
+        proxy_http_version     1.1;
+        proxy_set_header       Authorization '';
+        proxy_hide_header      x-amz-id-2;
+        proxy_hide_header      x-amz-request-id;
+        proxy_hide_header      Set-Cookie;
+        proxy_ignore_headers   "Set-Cookie";
+        proxy_buffering        off;
+        proxy_intercept_errors on;
+        proxy_pass http://{{aws_s3_custom_domain}}/sitemap.xml;
+    }
+
     {% else %}
 
     location /static/ {
         alias   {{ nginx_static_dir }};
     }
 
-    {% endif %}
-
     location /sitemap.xml {
       root {{ nginx_static_dir }};
       try_files $uri @django;
     }
+
+    {% endif %}
 
     location /media/ {
         alias   {{ nginx_media_dir }};
