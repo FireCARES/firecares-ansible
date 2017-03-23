@@ -61,21 +61,22 @@ fi
 
 CURRENT_TAG="tag_Name_web_server_${DEPLOY_ENV}_${HASH}"
 echo Current web tags: $CURRENT_TAG
-# Make sure that the new servers aren't included in the set to show the maintenance mode on
-MAINT_HOSTS=$(python hosts/ec2.py | python to_inventory.py tag_Group_web_server_${DEPLOY_ENV} $CURRENT_TAG)
 
-if [ "$MAINT_HOSTS" != "" ]; then
-  echo Hosts to apply maintenance mode: $MAINT_HOSTS
-  if [ "$PRIVATE_KEY_FILE" != "" ]; then
-    echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
-    ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
-  else
-    echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
-    ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
-  fi
-else
-  echo No hosts need to be set to maintenance mode, skipping...
-fi
+# # Make sure that the new servers aren't included in the set to show the maintenance mode on
+# MAINT_HOSTS=$(python hosts/ec2.py | python to_inventory.py tag_Group_web_server_${DEPLOY_ENV} $CURRENT_TAG)
+#
+# if [ "$MAINT_HOSTS" != "" ]; then
+#   echo Hosts to apply maintenance mode: $MAINT_HOSTS
+#   if [ "$PRIVATE_KEY_FILE" != "" ]; then
+#     echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
+#     ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
+#   else
+#     echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
+#     ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
+#   fi
+# else
+#   echo No hosts need to be set to maintenance mode, skipping...
+# fi
 
 # Now, collectstatic, etc on the first current server
 NEW_HOSTS=$(python hosts/ec2.py | python to_inventory.py $CURRENT_TAG)
@@ -103,13 +104,26 @@ done
 
 set -e
 
+# $(ssh -t -i $PRIVATE_KEY_FILE ubuntu@$FIRST_NEW_HOST << EOF
+# sudo -u firecares sh -c "cd /webapps/firecares/; . bin/activate; cd firecares; python manage.py migrate --list | grep '\[\s\]'"
+# EOF
+# )
+
 if [ "$PRIVATE_KEY_FILE" != "" ]; then
-  echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic,django.generate_sitemap" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes, generate_sitemap=yes" --private-key=$PRIVATE_KEY_FILE --limit "$CURRENT_TAG[0]"
-  ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic,django.generate_sitemap" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes, generate_sitemap=yes" --private-key=$PRIVATE_KEY_FILE --limit "$CURRENT_TAG[0]"
+  echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.collectstatic" --extra-vars="run_django_collectstatic=yes" --private-key=$PRIVATE_KEY_FILE --limit "$CURRENT_TAG[0]"
+  ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.collectstatic" --extra-vars="run_django_collectstatic=yes" --private-key=$PRIVATE_KEY_FILE --limit "$CURRENT_TAG[0]"
 else
-  echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic,django.generate_sitemap" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes, generate_sitemap=yes" --limit "$CURRENT_TAG[0]"
-  ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic,django.generate_sitemap" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes, generate_sitemap=yes" --limit "$CURRENT_TAG[0]"
+  echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.collectstatic" --extra-vars="run_django_collectstatic=yes" --limit "$CURRENT_TAG[0]"
+  ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.collectstatic" --extra-vars="run_django_collectstatic=yes" --limit "$CURRENT_TAG[0]"
 fi
+
+# if [ "$PRIVATE_KEY_FILE" != "" ]; then
+#   echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic,django.generate_sitemap" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes, generate_sitemap=yes" --private-key=$PRIVATE_KEY_FILE --limit "$CURRENT_TAG[0]"
+#   ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic,django.generate_sitemap" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes, generate_sitemap=yes" --private-key=$PRIVATE_KEY_FILE --limit "$CURRENT_TAG[0]"
+# else
+#   echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic,django.generate_sitemap" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes, generate_sitemap=yes" --limit "$CURRENT_TAG[0]"
+#   ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic,django.generate_sitemap" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes, generate_sitemap=yes" --limit "$CURRENT_TAG[0]"
+# fi
 
 # Now, we can switch DNS over
 python - <<- EOF
