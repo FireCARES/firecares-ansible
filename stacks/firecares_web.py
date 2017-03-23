@@ -32,7 +32,7 @@ ami = t.add_parameter(Parameter(
 
 web_capacity = t.add_parameter(Parameter(
     "WebServerCapacity",
-    Default="1",
+    Default="2",
     Description="The initial number of WebServer instances",
     Type="Number",
     ConstraintDescription="must be between 1 and 5 EC2 instances.",
@@ -48,7 +48,7 @@ commit = t.add_parameter(Parameter(
 
 web_instance_class = t.add_parameter(Parameter(
     "WebInstanceClass",
-    Default="t2.small",
+    Default="t2.medium",
     Description="WebServer EC2 instance type",
     Type="String",
     ConstraintDescription="must be a valid EC2 instance type.",
