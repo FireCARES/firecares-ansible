@@ -32,11 +32,19 @@ filebeat.prospectors:
 - input_type: log
   paths:
     - /webapps/firecares/logs/celery.log
+  multiline:
+    pattern: '^\[\d+'
+    negate: true
+    match: after
   document_type: celery
 
 - input_type: log
   paths:
     - /webapps/firecares/logs/gunicorn_supervisor.log
+  multiline:
+    pattern: '^\[\d+'
+    negate: true
+    match: after
   document_type: gunicorn_supervisor
 
 - input_type: log
