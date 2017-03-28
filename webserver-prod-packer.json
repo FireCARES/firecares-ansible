@@ -12,6 +12,7 @@
     "source_ami": "ami-99da6c8f",
     "instance_type": "t2.small",
     "ssh_username": "ubuntu",
+    "ssh_timeout": "5m",
     "ami_name": "webserver-prod-{{user `commit`}}"
   }],
   "provisioners": [
@@ -24,7 +25,7 @@
                 "/usr/bin/apt-get update",
                 "/usr/bin/apt-get -y install openssl libssl-dev libssl-doc build-essential libffi-dev python-dev python-pip",
                 "pip install ansible==1.9.4",
-                "sudo dd if=/dev/zero of=/var/swap.img bs=1M count=1024",
+                "sudo dd if=/dev/zero of=/var/swap.img bs=1M count=2048",
                 "sudo mkswap /var/swap.img",
                 "sudo swapon /var/swap.img",
                 "sudo echo \"/var/swap.img  swap       swap    defaults        0 0\" >> /etc/fstab"
