@@ -9,7 +9,7 @@ DNS=${DNS:-staging.firecares.org}
 URL=https://$DNS
 DBPASS=${DBPASS:-}
 DBUSER=${DBUSER:-}
-RUN_MIGRATIONS=${RUN_MIGRATIONS:0}
+RUN_MIGRATIONS=${RUN_MIGRATIONS:-0}
 PACKER=$(which packer) || PACKER=/usr/local/packer
 PRIVATE_KEY_FILE=${PRIVATE_KEY_FILE:-}
 
