@@ -10,7 +10,7 @@
     - deployment_env: prod
   vars_files:
     - env_vars/base.yml
-    - env_vars/production_staging.yml
+    - env_vars/production.yml
   roles:
     - base
     - rabbitmq

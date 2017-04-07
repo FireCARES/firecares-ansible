@@ -14,7 +14,7 @@
 
   vars_files:
     - env_vars/base.yml
-    - env_vars/production_staging.yml
+    - env_vars/production.yml
 
   environment:
       AWS_ACCESS_KEY_ID: "{{ aws_access_key_id }}"

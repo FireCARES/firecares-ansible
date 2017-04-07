@@ -10,12 +10,12 @@
     PGUSER: "{{database_user}}"
 
 - name: backup_old_fixture
-  command: aws s3 mv s3://firecares-share/fixtures/firecares_fixtures_public.sql.gz s3://firecares-share/fixtures/backups/{{ansible_date_time.date}}-firecares_fixtures_public.sql.gz
+  command: aws s3 mv s3://firecares-share/fixtures/firecares_fixtures.sql.gz s3://firecares-share/fixtures/backups/{{ansible_date_time.date}}-firecares_fixtures.sql.gz
   become_user: "{{ gunicorn_user }}"
   ignore_errors: yes
 
 - name: upload fixtures to s3
-  command: aws s3 cp {{virtualenv_path}}/firecares_fixtures.sql.gz s3://firecares-share/fixtures/firecares_fixtures_public.sql.gz
+  command: aws s3 cp {{virtualenv_path}}/firecares_fixtures.sql.gz s3://firecares-share/fixtures/firecares_fixtures.sql.gz
   become_user: "{{ gunicorn_user }}"
 
 - name: remove fixtures
