@@ -1,11 +1,10 @@
 ---
 
 - name: Install Memcached
-  apt: name=memcached update_cache={{ update_apt_cache }} state=installed
-  tags: packages
-
-- name: Install Python Memcached
-  apt: name=python-memcache update_cache={{ update_apt_cache }} state=installed
+  apt: name={{ item }} update_cache={{ update_apt_cache }} state=installed
+  with_items:
+    - memcached
+    - libmemcached-dev
   tags: packages
 
 - name: Create the Memcached configuration file
