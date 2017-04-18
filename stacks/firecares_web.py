@@ -124,26 +124,26 @@ load_balancer = t.add_resource(LoadBalancer(
     CrossZone=True,
     AvailabilityZones=GetAZs(""),
     LoadBalancerName=Join('-', ['firecares', Ref(environment), Ref(commit)]),
-    LBCookieStickinessPolicy=[
+    AppCookieStickinessPolicy=[
       {
-        "PolicyName": "CookieBasedPolicy",
-        "CookieExpirationPeriod": "30"
+        "PolicyName": "AppCookieBasedPolicy",
+        "CookieName": "sticky"
       }
     ],
     Listeners=[
      {
         "LoadBalancerPort": "80",
         "InstancePort": "80",
-        "Protocol": "HTTP",
-        "PolicyNames": [
-          "CookieBasedPolicy"
-        ]
+        "Protocol": "HTTP"
       },
      {
         "LoadBalancerPort": "443",
         "InstancePort": "80",
         "Protocol": "HTTPS",
-        "SSLCertificateId": "arn:aws:iam::164077527722:server-certificate/firecares"
+        "SSLCertificateId": "arn:aws:iam::164077527722:server-certificate/firecares",
+        "PolicyNames": [
+            "AppCookieBasedPolicy"
+        ]
       }
     ]
 ))
