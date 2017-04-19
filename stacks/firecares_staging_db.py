@@ -124,8 +124,10 @@ rabbit_mq_sg = t.add_resource(SecurityGroup(
         SecurityGroupRule("TylerAccess", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="69.255.184.149/32"),
         SecurityGroupRule("JoeAccess", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="65.254.97.100/32"),
         SecurityGroupRule("JoeAccess2", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="108.66.75.162/32"),
+        SecurityGroupRule("JoeAccess3", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="71.86.4.190/32"),
         SecurityGroupRule("JoeAccessWeb", IpProtocol="tcp", FromPort="15672", ToPort="15672", CidrIp="65.254.97.100/32"),
         SecurityGroupRule("JoeAccess2Web", IpProtocol="tcp", FromPort="15672", ToPort="15672", CidrIp="108.66.75.162/32"),
+        SecurityGroupRule("JoeAccess3Web", IpProtocol="tcp", FromPort="15672", ToPort="15672", CidrIp="71.86.4.190/32"),
         SecurityGroupRule("RabbitMQWeb", IpProtocol="tcp", FromPort="15672", ToPort="15672", CidrIp="69.255.184.149/32"),
         SecurityGroupRule("RabbitMQ", IpProtocol="tcp", FromPort="5672", ToPort="5672", CidrIp="69.255.184.149/32"),
         SecurityGroupRule("ClientAccess", IpProtocol="tcp", FromPort="5672", ToPort="5672", SourceSecurityGroupId=Ref(webserver_sg))
