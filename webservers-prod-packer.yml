@@ -22,6 +22,7 @@
 
   roles:
     - base
+    - memcached
     - web
     - celery
     - filebeat

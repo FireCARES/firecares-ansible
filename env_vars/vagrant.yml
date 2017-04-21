@@ -5,6 +5,8 @@
 # to port 8000, and the application user will be allowed to ssh in.
 development_mode: no
 
+install_memcached: yes
+
 # Git settings.
 # When using vagrant, symlink FireCARES vs using Git.
 setup_git_repo: no

@@ -38,6 +38,10 @@ def delete_firecares_stack(stack_or_name):
     ec2.revoke_security_group(group_id='sg-f1ce248e', src_security_group_group_id=old_sg, ip_protocol='tcp',
                               from_port=5043, to_port=5043)
 
+    click.echo('Revoking access from security group {} to memcached'.format(old_sg))
+    ec2.revoke_security_group(group_id='sg-8163f8e6', src_security_group_group_id=old_sg, ip_protocol='tcp',
+                              from_port=11211, to_port=11211)
+
     click.echo('Deleting stack: {}'.format(stack_or_name.stack_name))
     conn.delete_stack(stack_or_name.stack_name)
 
@@ -156,6 +160,13 @@ def deploy(ami, env, commithash, dbpass, dbuser, s3cors):
                                          from_port=5043, to_port=5043)
         except EC2ResponseError:
             click.secho('ELK web security group already exists.')
+
+        click.secho('Updating memcached security group with ingress from new web security group.')
+        try:
+            ec2.authorize_security_group(group_id='sg-8163f8e6', src_security_group_group_id=sg.value, ip_protocol='tcp',
+                                         from_port=11211, to_port=11211)
+        except EC2ResponseError:
+            click.secho('memcached web security group already exists.')
 
     _delete_old_stacks(ami=ami, env=env)
 

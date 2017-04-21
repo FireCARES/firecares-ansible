@@ -1,0 +1,5 @@
+---
+
+- name: Install Memcached
+  apt: name=libmemcached-dev update_cache={{ update_apt_cache }} state=installed
+  tags: packages
