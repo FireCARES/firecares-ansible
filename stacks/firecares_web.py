@@ -123,7 +123,7 @@ load_balancer = t.add_resource(LoadBalancer(
     "LoadBalancer",
     CrossZone=True,
     AvailabilityZones=GetAZs(""),
-    LoadBalancerName=Join('-', ['firecares', Ref(environment), Ref(commit)]),
+    LoadBalancerName=Join('-', ['fc', Ref(environment), Ref(commit)]),
     AppCookieStickinessPolicy=[
       {
         "PolicyName": "AppCookieBasedPolicy",

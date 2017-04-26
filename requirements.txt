@@ -1,0 +1,5 @@
+ansible==1.9.4
+boto==2.45.0
+click==6.7
+tabulate==0.7.5
+troposphere==1.9.2

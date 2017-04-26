@@ -27,8 +27,8 @@ echo "URL: ${URL}"
 
 mkdir -p $TMP
 # Force a specific commit hash by commenting-out the following line
-git -C $CODE_LOCATION rev-parse HEAD | cut -b 1-10 > $TMP/commit_hash.txt
-HASH=$(cat $TMP/commit_hash.txt)
+git -C $CODE_LOCATION rev-parse HEAD | cut -b 1-6 > $TMP/commit_hash.txt
+HASH=$(cat $TMP/commit_hash.txt)-$(date +%Y%m%d-%H%M)
 
 echo "Using commit hash: ${HASH}"
 
@@ -60,7 +60,7 @@ else
   python stacks/deploy.py deploy --env $DEPLOY_ENV --s3cors $URL --ami $AMI --commithash $HASH
 fi
 
-CURRENT_TAG="tag_Name_web_server_${DEPLOY_ENV}_${HASH}"
+CURRENT_TAG="tag_Name_web_server_${DEPLOY_ENV}_$(echo $HASH | tr - _)"
 echo Current web tags: $CURRENT_TAG
 
 # Make sure that the new servers aren't included in the set to show the maintenance mode on
@@ -142,7 +142,7 @@ elb_conn = elb.connect_to_region('us-east-1')
 r_conn = connect_to_region('us-east-1')
 
 try:
-    target = elb_conn.get_all_load_balancers(load_balancer_names=['firecares-$DEPLOY_ENV-$HASH'])[0]
+    target = elb_conn.get_all_load_balancers(load_balancer_names=['fc-$DEPLOY_ENV-$HASH'])[0]
 except BotoServerError as e:
     print 'No load balancer defined as firecares-$DEPLOY_ENV-$HASH, skipping DNS update...'
     sys.exit(1)

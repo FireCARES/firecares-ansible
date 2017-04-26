@@ -1,5 +1,6 @@
 import click
 import time
+from tabulate import tabulate
 from boto.cloudformation.connection import CloudFormationConnection
 from boto.cloudformation.stack import Stack
 from boto import connect_ec2
@@ -76,7 +77,7 @@ def _delete_old_stacks(ami=None, keep=2, env='dev'):
     old_stacks = sorted(old_stacks, key=lambda x: x.creation_time, reverse=True)[keep:]
     click.secho("Deleting {count} stacks...".format(count=len(old_stacks)))
     for old_stack in old_stacks:
-        click.secho("Deleteing {}".format(old_stack.stack_name))
+        click.secho("Deleting {}".format(old_stack.stack_name))
         delete_firecares_stack(old_stack)
     click.secho("Done")
 
@@ -122,7 +123,15 @@ def deploy(ami, env, commithash, dbpass, dbuser, s3cors):
         time.sleep(10)
         stack = conn.describe_stacks(stack_name_or_id=name)[0]
 
+    if stack.stack_status != 'CREATE_COMPLETE':
+        click.secho('Web stack creation failed...bailing')
+        click.get_current_context().exit(code=1)
+
     db_stack = conn.describe_stacks(stack_name_or_id=db_stack)[0]
+
+    if db_stack.stack_status != 'UPDATE_COMPLETE':
+        click.secho('DB stack update failed...bailing')
+        click.get_current_context().exit(code=2)
 
     sg = get_web_security_group(stack)
 
@@ -178,6 +187,17 @@ def delete_stack(name):
     Deletes the stack and un-registers entries in various security groups the app needs access to.
     """
     delete_firecares_stack(name)
+
+
+@firecares_deploy.command()
+def list_stacks():
+    conn = CloudFormationConnection()
+
+    def get_failures(stack):
+        return ' | '.join(set([x.resource_status_reason for x in stack.describe_events()[:10] if x.resource_status.endswith('FAILED')]))
+
+    rows = [[x.stack_name, x.stack_status, x.creation_time.isoformat(), get_failures(x)] for x in conn.describe_stacks() if x.stack_name.startswith('firecares')]
+    click.secho(tabulate(rows, headers=['NAME', 'STATUS', 'CREATED AT', 'ERRORS']))
 
 
 if __name__ == '__main__':
