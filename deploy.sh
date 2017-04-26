@@ -63,10 +63,10 @@ fi
 CURRENT_TAG="tag_Name_web_server_${DEPLOY_ENV}_${HASH}"
 echo Current web tags: $CURRENT_TAG
 
-if [ "$RUN_MIGRATIONS" != "0" ]; then
-  # Make sure that the new servers aren't included in the set to show the maintenance mode on
-  MAINT_HOSTS=$(python hosts/ec2.py | python to_inventory.py tag_Group_web_server_${DEPLOY_ENV} $CURRENT_TAG)
+# Make sure that the new servers aren't included in the set to show the maintenance mode on
+MAINT_HOSTS=$(python hosts/ec2.py | python to_inventory.py tag_Group_web_server_${DEPLOY_ENV} $CURRENT_TAG)
 
+if [ "$RUN_MIGRATIONS" != "0" ]; then
   if [ "$MAINT_HOSTS" != "" ]; then
     echo Hosts to apply maintenance mode: $MAINT_HOSTS
     if [ "$PRIVATE_KEY_FILE" != "" ]; then
@@ -166,3 +166,19 @@ rrs.commit()
 
 print 'Set $DNS ALIAS to {alias}'.format(alias=dest)
 EOF
+
+# Wait for a little bit before spinning down the old webservers
+sleep 120
+
+if [ "$MAINT_HOSTS" != "" ]; then
+  echo Hosts to turn off: $MAINT_HOSTS
+  if [ "$PRIVATE_KEY_FILE" != "" ]; then
+    echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
+    ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
+  else
+    echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
+    ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
+  fi
+else
+  echo No hosts need to be spun down...
+fi

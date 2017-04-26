@@ -67,3 +67,4 @@ django_environment:
   DOCUMENT_UPLOAD_BUCKET: "{{ document_upload_bucket }}"
   HELIX_SECRET: "{{ helix_secret|default(omit) }}"
   COMPRESS_URL: "{{ compress_url|default(omit) }}"
+  OSGEO_STORAGE_BUCKET_NAME: "{{ document_upload_bucket }}"
