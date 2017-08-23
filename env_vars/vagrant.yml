@@ -4,7 +4,7 @@
 # application remotely from pycharm on port 8000. nginx is then configured to route everything
 # to port 8000, and the application user will be allowed to ssh in.
 development_mode: no
-
+development_niceties: yes
 install_memcached: yes
 
 # Git settings.

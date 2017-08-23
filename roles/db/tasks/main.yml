@@ -1,5 +1,12 @@
 ---
 
+- name: Configure the PostgreSQL APT key
+  apt_key: url=https://www.postgresql.org/media/keys/ACCC4CF8.asc state=present
+
+- name: Configure the PostgreSQL APT repositories
+  apt_repository: repo="deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release}}-pgdg main"
+                  state=present
+
 - name: Install PostgreSQL
   apt: name={{ item }} update_cache={{ update_apt_cache }} state=installed
   with_items:
@@ -10,14 +17,6 @@
 
 - name: Ensure the PostgreSQL service is running
   service: name=postgresql state=started enabled=yes
-
-
-- name: Configure the PostgreSQL APT key
-  apt_key: url=https://www.postgresql.org/media/keys/ACCC4CF8.asc state=present
-
-- name: Configure the PostgreSQL APT repositories
-  apt_repository: repo="deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release}}-pgdg main"
-                  state=present
 
 - name: Install PostGIS
   apt: pkg={{ item }} state=present

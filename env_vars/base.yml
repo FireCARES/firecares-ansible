@@ -5,9 +5,9 @@ git_repo: /firecares
 project_name: firecares
 application_name: firecares
 
-postgresql_version: "9.3"
-postgis_version: "2.1"
-postgis_package_version: "2.1.*.pgdg14.04+1"
+postgresql_version: "9.6"
+postgis_version: "2.3"
+postgis_package_version: "2.3.*.pgdg14.04+1"
 
 tiles: ["firecares_addresses.mbtiles", "stations.mbtiles", "districts.mbtiles", "hydrants.mbtiles"]
 

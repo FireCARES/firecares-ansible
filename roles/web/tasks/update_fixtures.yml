@@ -1,5 +1,5 @@
 # To run this specify update_fixtures as an extra variable:
-# ansible-playbook vagrant.yml -i vagrant_server --tags=update_fixtures -e update_fixtures=true
+# ansible-playbook vagrant.yml -i development --tags=update_fixtures -e update_fixtures=true --private-key .vagrant/machines/default/virtualbox/private_key
 # ansible-playbook production-playbook.yml -i production.yml --tags=update_fixtures -e update_fixtures=true --limit webservers
 
 - name: dump fixtures

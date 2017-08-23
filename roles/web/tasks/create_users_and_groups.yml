@@ -3,6 +3,18 @@
 - name: Create the application user
   user: name={{ gunicorn_user }} state=present
 
+- name: Allow for sudo for {{ gunicorn_user }}
+  user: name={{ gunicorn_user }} state=present groups="sudo" append=yes
+  when: development_niceties is defined and development_niceties
+
+- name: Allow 'sudo' group to have passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%sudo'
+    line: '%sudo ALL=(ALL:ALL) NOPASSWD:ALL'
+  when: development_niceties is defined and development_niceties
+
 - name: Create the application group
   group: name={{ gunicorn_group }} system=yes state=present
 
