@@ -1,0 +1,47 @@
+{
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": "",
+    "commit": ""
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "region": "us-east-1",
+    "source_ami": "ami-6bed5d7d",
+    "instance_type": "t2.small",
+    "ssh_username": "ubuntu",
+    "ssh_timeout": "5m",
+    "ami_name": "celerybeat-dev-{{user `commit`}}"
+  }],
+  "provisioners": [{
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
+      "inline": [
+        "apt-add-repository ppa:rquillo/ansible",
+        "/usr/bin/apt-get update",
+        "/usr/bin/apt-get -y install openssl libssl-dev libssl-doc build-essential libffi-dev python-dev python-pip",
+        "pip install ansible==1.9.4",
+        "sudo dd if=/dev/zero of=/var/swap.img bs=1M count=1024",
+        "sudo mkswap /var/swap.img",
+        "sudo swapon /var/swap.img",
+        "sudo echo \"/var/swap.img  swap       swap    defaults        0 0\" >> /etc/fstab"
+      ]
+    },
+    {
+      "type": "ansible-local",
+      "playbook_dir": ".",
+      "playbook_file": "packer/celerybeat/celerybeat-dev-packer.yml",
+      "role_paths": [
+        "roles/"
+      ],
+      "extra_arguments": ["--extra-vars \"celery_queues=singlenode run_beat=true\" --skip-tags \"nginx,supervisor\""]
+    }
+  ],
+  "post-processors": [{
+    "type": "manifest",
+    "output": "manifest.json",
+    "strip_path": true
+  }]
+}

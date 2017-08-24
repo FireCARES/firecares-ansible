@@ -107,7 +107,7 @@ ansible-playbook -i development site.yml
 If you're testing with vagrant, you can use this command:
 
 ```
-ansible-playbook -i vagrant_ansible_inventory_default --private-key=~/.vagrant.d/insecure_private_key vagrant.yml
+ansible-playbook -i vagrant_server vagrant.yml
 ```
 
 ## Activating the virtual environment from vagrant

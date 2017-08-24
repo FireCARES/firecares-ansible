@@ -1,0 +1,7 @@
+---
+
+- include: install_r.yml
+  tags: r
+
+- include: build_r_package.yml
+  tags: r

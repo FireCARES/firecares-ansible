@@ -9,11 +9,11 @@
     "access_key": "{{user `aws_access_key`}}",
     "secret_key": "{{user `aws_secret_key`}}",
     "region": "us-east-1",
-    "source_ami": "ami-99da6c8f",
+    "source_ami": "ami-6bed5d7d",
     "instance_type": "t2.small",
     "ssh_username": "ubuntu",
     "ssh_timeout": "5m",
-    "ami_name": "webserver-prod-{{user `commit`}}"
+    "ami_name": "webserver-dev-{{user `commit`}}"
   }],
   "provisioners": [
         {
@@ -34,7 +34,7 @@
         {
             "type": "ansible-local",
             "playbook_dir": ".",
-            "playbook_file": "webservers-prod-packer.yml",
+            "playbook_file": "packer/web/webservers-dev-packer.yml",
             "role_paths": [
                 "roles/"
             ]

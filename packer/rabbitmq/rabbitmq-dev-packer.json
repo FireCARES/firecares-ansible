@@ -11,7 +11,7 @@
     "source_ami": "ami-d05e75b8",
     "instance_type": "t2.micro",
     "ssh_username": "ubuntu",
-    "ami_name": "rabbitmq-prod-{{timestamp}}"
+    "ami_name": "rabbitmq-dev-{{timestamp}}"
   }],
   "provisioners": [
         {
@@ -27,7 +27,7 @@
         {
             "type": "ansible-local",
             "playbook_dir": ".",
-            "playbook_file": "rabbitmq-prod-packer.yml",
+            "playbook_file": "packer/rabbitmq/rabbitmq-dev-packer.yml",
             "role_paths": [
                 "roles/"
             ]

@@ -1,0 +1,26 @@
+---
+
+- name: Add CRAN apt repo
+  apt_repository:
+    repo: deb https://cran.rstudio.com/bin/linux/ubuntu trusty/
+    state: present
+
+- name: Add CRAN key
+  apt_key:
+    keyserver: hkp://keyserver.ubuntu.com
+    id: E084DAB9
+
+- name: Install R-base
+  apt: name="r-base" update_cache=yes
+
+- name: Install fire-risk dependencies
+  command: >
+    Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item }}' %in% installed.packages()[,'Package'])) { install.packages(pkgs='{{ item }}', repos=c('https://cloud.r-project.org/')); print('Added'); } else { print('Already installed'); }"
+  register: r_result
+  failed_when: "r_result.rc != 0 or 'had non-zero exit status' in r_result.stderr"
+  changed_when: "'Added' in r_result.stdout"
+  with_items:
+      - acs
+      - glmnet
+      - ranger
+      - RPostgreSQL

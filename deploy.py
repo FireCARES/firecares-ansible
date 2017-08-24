@@ -1,13 +1,25 @@
 import click
 import time
+import sh
+import os
+import datetime
+import sys
 from tabulate import tabulate
 from boto.cloudformation.connection import CloudFormationConnection
 from boto.cloudformation.stack import Stack
 from boto import connect_ec2
 from boto.exception import BotoServerError, EC2ResponseError
-from firecares_db import t as db_server_stack
-from firecares_web import t as web_server_stack
-from firecares_staging_db import t as db_staging_server_stack
+from boto.ec2 import elb
+from boto.route53 import connect_to_region
+from boto.route53.record import ResourceRecordSets
+from stacks.firecares_db import t as db_server_stack
+from stacks.firecares_web import t as web_server_stack
+from stacks.firecares_staging_db import t as db_staging_server_stack
+
+DNS = {
+    'dev': 'test.firecares.org',
+    'prod': 'firecares.org'
+}
 
 
 def get_web_security_group(stack):
@@ -29,10 +41,9 @@ def delete_firecares_stack(stack_or_name):
     if not isinstance(stack_or_name, Stack):
         stack_or_name = conn.describe_stacks(stack_name_or_id=stack_or_name)[0]
 
-    old_sg = get_web_security_group(stack_or_name)
-    if old_sg:
-        old_sg = old_sg.value
-
+    ws = get_web_security_group(stack_or_name)
+    if ws:
+        old_sg = ws.value
         click.echo('Revoking access from security group {} to NFIRS.'.format(old_sg))
         ec2.revoke_security_group(group_id='sg-13fd9e77', src_security_group_group_id=old_sg, ip_protocol='tcp',
                                   from_port=5432, to_port=5432)
@@ -47,26 +58,6 @@ def delete_firecares_stack(stack_or_name):
 
     click.echo('Deleting stack: {}'.format(stack_or_name.stack_name))
     conn.delete_stack(stack_or_name.stack_name)
-
-
-@click.group(invoke_without_command=True)
-@click.pass_context
-def firecares_deploy(ctx):
-    if ctx.invoked_subcommand is None:
-        click.secho(r"""FireCARES Deployment Script""", fg='green')
-        click.echo(firecares_deploy.get_help(ctx))
-    return ctx.invoked_subcommand
-
-
-@firecares_deploy.command()
-@click.option('--ami', help='Currently deployed AMI')
-@click.option('--keep', default=2, help='# of stacks to keep in AWS')
-@click.option('--env', default='dev', help='Environment (dev/prod)')
-def delete_old_stacks(ami, keep, env):
-    """
-    Delete old FireCARES webserver CloudFormation stacks from AWS.
-    """
-    _delete_old_stacks(ami, keep, env)
 
 
 def _delete_old_stacks(ami=None, keep=2, env='dev'):
@@ -84,16 +75,145 @@ def _delete_old_stacks(ami=None, keep=2, env='dev'):
     click.secho("Done")
 
 
+def _get_commit_hash(location='../firecares'):
+    if sh.git('-C', location, 'diff', _tty_out=False).stdout or sh.git('-C', location, 'diff', '--cached', _tty_out=False).stdout:
+        click.secho('WARNING: There are unstaged changes, deployment uses the github repository when packing images!', fg='yellow')
+
+    chash = sh.git('-C', location, 'rev-parse', 'HEAD').stdout[0:6]
+    dt = datetime.datetime.now().strftime('%Y%m%d-%H%M')
+    return '{}-{}'.format(chash, dt)
+
+
+@click.group(invoke_without_command=True)
+@click.pass_context
+def firecares_deploy(ctx):
+    if ctx.invoked_subcommand is None:
+        click.secho(r"""FireCARES Deployment Script""", fg='green')
+        click.echo(firecares_deploy.get_help(ctx))
+    return ctx.invoked_subcommand
+
+
+@firecares_deploy.command()
+@click.option('--env', default='dev')
+def full_deploy(env):
+    # Generate commit hash
+    curhash = _get_commit_hash()
+    click.secho('Packing web/celery VMs using FireCARES commit hash/date: {}'.format(curhash), fg='green')
+
+    # Pack webserver AMI
+
+    # Pack beat AMI
+
+    # run "deploy" (deploys cloudformation stack)
+    # - switch to maintenance mode if there are migrations
+    # - run migrations on first node
+    # collecstatic on first host
+    # Switch DNS
+    # switch maintenance mode off (if needed)
+    pass
+
+
+@firecares_deploy.command()
+@click.option('--ami', help='Currently deployed AMI')
+@click.option('--keep', default=2, help='# of stacks to keep in AWS')
+@click.option('--env', default='dev', help='Environment (dev/prod)')
+def delete_old_stacks(ami, keep, env):
+    """
+    Delete old FireCARES webserver CloudFormation stacks from AWS.
+    """
+    _delete_old_stacks(ami, keep, env)
+
+
+@firecares_deploy.command()
+@click.option('--env', default='dev', help='Environment (dev|prod)')
+@click.option('--hash', default='')
+@click.option('--path', default='')
+def test(env, hash, path):
+    res = sh.ls('-al', _iter=True)
+    for r in res:
+        print r,
+
+
+def _delete_old_stacks(ami=None, keep=2, env='dev'):
+    conn = CloudFormationConnection()
+    # If there are old stacks, flag them for deletion
+    name = 'firecares-{}-web'.format(env)
+    old_stacks = [n for n in conn.describe_stacks() if name in n.stack_name and (not ami or ami not in n.stack_name)]
+    # Keep 2 stacks by default so that we don't have any potential downtime
+    old_stacks = sorted(old_stacks, key=lambda x: x.creation_time, reverse=True)[keep:]
+    click.secho("Deleting {count} stacks...".format(count=len(old_stacks)))
+    for old_stack in old_stacks:
+        click.secho("Deleting {}".format(old_stack.stack_name))
+        delete_firecares_stack(old_stack)
+    click.secho("Done")
+
+
+@firecares_deploy.command()
+@click.option('--env', default='dev', help='Environment (dev|prod)')
+@click.option('--commithash', default='')
+def pack_webserver(env, commithash):
+    if not commithash:
+        commithash = _get_commit_hash()
+    path = 'packer/web/webserver-{}-packer.json'.format(env)
+    res = sh.packer("build", "-machine-readable", "-var", "commit=" + commithash, path, _iter=True)
+    for r in res:
+        print r,
+
+
+@firecares_deploy.command()
+@click.option('--env', default='dev', help='Environment (dev|prod)')
+@click.option('--hash', default='')
+def switch_dns(env, hash):
+    """
+    Switches DNS to latest ELB in specified FireCARES environment.
+    """
+
+    dns = DNS[env]
+
+    elb_conn = elb.connect_to_region('us-east-1')
+    r_conn = connect_to_region('us-east-1')
+    import pudb; pudb.set_trace()
+
+    lbs = elb_conn.get_all_load_balancers()
+    fclbs = sorted(filter(lambda x: x.name.startwith('fc-{}'.format(env)), lbs), key=lambda x: x.name)
+    if not fblbs:
+        print 'No load balancer for env: {}'.format(env)
+        sys.exit(1)
+    elif len(fblbs) == 1:
+        print 'WARNING: Only 1 load balancer in place, potential for no effect on DNS switch'
+    target = fclbs[0]
+
+    zone = r_conn.get_zone('firecares.org')
+    record = zone.find_records(dns, 'A')
+    hosted_zone = record.alias_hosted_zone_id
+
+    alias = 'dualstack.{dns}.'.format(dns=target.dns_name.lower())
+
+    dest = 'ALIAS dualstack.{dns}. ({hosted_zone})'.format(dns=target.dns_name.lower(), hosted_zone=hosted_zone)
+
+    rrs = ResourceRecordSets(r_conn, zone.id)
+    cr = rrs.add_change('UPSERT', dns, type='A',
+                        alias_hosted_zone_id=hosted_zone,
+                        alias_dns_name=alias,
+                        alias_evaluate_target_health=False)
+    cr.add_value(dest)
+
+    rrs.commit()
+
+    print 'Set {dns} ALIAS to {alias}'.format(dns=dns, alias=dest)
+
+
 @firecares_deploy.command()
 @click.option('--ami', default='AMI', help='AMI to deploy')
-@click.option('--env', default='dev', help='Environment')
+@click.option('--beatami', default='BEATAMI', help='Celery beat AMI to use')
+@click.option('--env', default='dev', help='Environment (dev|prod)')
 @click.option('--commithash', help='The hash of the commit used to generate the AMI')
 @click.option('--dbpass', help='Database password from firecares-db stack.')
 @click.option('--dbuser', help='Database user from firecares-db stack.')
 @click.option('--s3cors', default='*', help='S3 CORS allowed hosts')
-def deploy(ami, env, commithash, dbpass, dbuser, s3cors):
+def deploy(ami, beatami, env, commithash, dbpass, dbuser, s3cors):
     """
-    Deploys a firecares environment.
+    Deploys a firecares environment/CloudFormation stack w/ security group tweaks.
 
     Note: This currently assumes the db stack is already created.
     """
@@ -103,7 +223,7 @@ def deploy(ami, env, commithash, dbpass, dbuser, s3cors):
     db_stack = '-'.join(['firecares', env])
     key_name = '-'.join(['firecares', env])
 
-    name = 'firecares-{}-web-{}'.format(env, commithash)
+    name = 'firecares-{env}-web-{commithash}'.format(env=env, commithash=commithash)
 
     try:
         stack = conn.describe_stacks(stack_name_or_id=name)[0]
@@ -116,7 +236,8 @@ def deploy(ami, env, commithash, dbpass, dbuser, s3cors):
                               ('KeyName', key_name),
                               ('baseAmi', ami),
                               ('Environment', env),
-                              ('CommitHash', commithash)])
+                              ('CommitHash', commithash),
+                              ('beatAmi', beatami)])
 
         stack = conn.describe_stacks(stack_name_or_id=name)[0]
 
@@ -186,13 +307,16 @@ def deploy(ami, env, commithash, dbpass, dbuser, s3cors):
 @click.option('--name', prompt='Enter the stack name.', confirmation_prompt=True)
 def delete_stack(name):
     """
-    Deletes the stack and un-registers entries in various security groups the app needs access to.
+    Deletes stack and un-register entries in various security groups the app needs access to.
     """
     delete_firecares_stack(name)
 
 
 @firecares_deploy.command()
 def list_stacks():
+    """
+    Display FireCARES CloudFormation stacks.
+    """
     conn = CloudFormationConnection()
 
     def get_failures(stack):

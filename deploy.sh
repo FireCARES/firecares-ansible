@@ -1,7 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
+EXISTING_HASH=${HASH:-}
 TMP=${TMP:-tmp}
 DEPLOY_ENV=${DEPLOY_ENV:-dev}
 CODE_LOCATION=${CODE_LOCATION:-../firecares}
@@ -11,7 +12,11 @@ DBPASS=${DBPASS:-}
 DBUSER=${DBUSER:-}
 RUN_MIGRATIONS=${RUN_MIGRATIONS:-0}
 PACKER=$(which packer) || PACKER=/usr/local/packer
-PRIVATE_KEY_FILE=${PRIVATE_KEY_FILE:-}
+PRIVATE_KEY_FILE=${PRIVATE_KEY_FILE:-~/.ssh/id_rsa}
+BOLD="\033[1m"
+BOLDOFF="\033[0m"
+START=$(date +%s)
+STEPS=8
 
 if [ "$DBUSER" != "" ]; then
   echo "Using user: ${DBUSER} for database"
@@ -19,118 +24,213 @@ else
   echo "DB creds not included...pre-setup persistent db vs CF managed"
 fi
 
-echo "Temporary file location: ${TMP}"
-echo "Deployment environment: ${DEPLOY_ENV}"
-echo "FireCARES code location: ${CODE_LOCATION}"
-echo "DNS entry for deployment: ${DNS}"
-echo "URL: ${URL}"
+echo -e "Temporary file location: ${BOLD}${TMP}${BOLDOFF}"
+echo -e "Deployment environment: ${BOLD}${DEPLOY_ENV}${BOLDOFF}"
+echo -e "FireCARES code location: ${BOLD}${CODE_LOCATION}${BOLDOFF}"
+echo -e "DNS entry for deployment: ${BOLD}${DNS}${BOLDOFF}"
+echo -e "URL: ${BOLD}${URL}${BOLDOFF}"
 
 mkdir -p $TMP
-# Force a specific commit hash by commenting-out the following line
-git -C $CODE_LOCATION rev-parse HEAD | cut -b 1-6 > $TMP/commit_hash.txt
-HASH=$(cat $TMP/commit_hash.txt)-$(date +%Y%m%d-%H%M)
 
-echo "Using commit hash: ${HASH}"
-
-EXISTING_AMI=$(aws ec2 describe-images --owners self --filters "Name=name,Values=webserver-${DEPLOY_ENV}-${HASH}")
-
-if [ "$(echo $EXISTING_AMI | wc -w)" -lt 10 ]; then
-  echo "AMI for webserver-${DEPLOY_ENV}-${HASH} not found...creating"
-  $PACKER build -machine-readable -color=false -var "commit=${HASH}" webserver-${DEPLOY_ENV}-packer.json | tee $TMP/packerlog.txt
-  cat $TMP/packerlog.txt | sed -n 's/^.*amazon-ebs,artifact.*AMIs were created.*\(ami.*\)$/\1/gp' > $TMP/current_ami.txt
-  # Check ami length, if 0 then abort
-  if [ $(wc -c < "$TMP/current_ami.txt") -eq 0 ]; then
-    echo "AMI build failure, bailing..."
-    exit 1
-  fi
-
-  AMI=$(cat $TMP/current_ami.txt)
-else
-  AMI=$(echo $EXISTING_AMI | python -c "import json,sys;j=json.load(sys.stdin);print j['Images'][0]['ImageId']")
-  echo "Re-deploying using existing AMI"
-fi
-
-echo AMI id: $AMI
-
-if [ "$DBUSER" != "" ]; then
-  echo python stacks/deploy.py deploy --env $DEPLOY_ENV --s3cors $URL --ami $AMI --commithash $HASH --dbpass $DBPASS --dbuser $DBUSER
-  python stacks/deploy.py deploy --env $DEPLOY_ENV --s3cors $URL --ami $AMI --commithash $HASH --dbpass $DBPASS --dbuser $DBUSER
-else
-  echo python stacks/deploy.py deploy --env $DEPLOY_ENV --s3cors $URL --ami $AMI --commithash $HASH
-  python stacks/deploy.py deploy --env $DEPLOY_ENV --s3cors $URL --ami $AMI --commithash $HASH
-fi
-
-CURRENT_TAG="tag_Name_web_server_${DEPLOY_ENV}_$(echo $HASH | tr - _)"
-echo Current web tags: $CURRENT_TAG
-
-# Make sure that the new servers aren't included in the set to show the maintenance mode on
-MAINT_HOSTS=$(python hosts/ec2.py | python to_inventory.py tag_Group_web_server_${DEPLOY_ENV} $CURRENT_TAG)
-
-if [ "$RUN_MIGRATIONS" != "0" ]; then
-  if [ "$MAINT_HOSTS" != "" ]; then
-    echo Hosts to apply maintenance mode: $MAINT_HOSTS
-    if [ "$PRIVATE_KEY_FILE" != "" ]; then
-      echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
-      ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
-    else
-      echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
-      ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
+stepavg() {
+  if [ -f "$TMP/$1.txt" ]; then
+    TOT=$(awk '{ sum += $1 } END { print sum }' $TMP/$1.txt)
+    LINES=$(wc -l < $TMP/$1.txt | tr -d ' ')
+    if [ $LINES -gt 0 ]; then
+      local avg=$(( $TOT / $LINES ))
+      if [ $avg -le 60 ]; then
+        echo -e "Average time to run: $avg seconds"
+      else
+        local t=$(bc -l <<< "scale=2; $avg/60")
+        echo -e "Average time to run: $t minutes"
+      fi
     fi
-  else
-    echo No hosts need to be set to maintenance mode, skipping...
   fi
-fi
+}
 
-# Now, collectstatic, etc on the first current server
-NEW_HOSTS=$(python hosts/ec2.py | python to_inventory.py $CURRENT_TAG)
-echo New web IP addresses: $NEW_HOSTS
-FIRST_NEW_HOST=$(echo $NEW_HOSTS | cut -d, -f 1)
-echo Host to run collectstatic/migrations on: $FIRST_NEW_HOST
-echo Waiting for SSH to open...
+step() {
+  CURSTEP=$1
+  echo -e "${BOLD}STEP [$1/${STEPS}]${BOLDOFF}"
+}
 
-if [ "$PRIVATE_KEY_FILE" != "" ]; then
+start() {
+  DT=$(date +%s)
+}
+
+stop() {
+  STOP=$(( `date +%s` - $DT ))
+}
+
+saveTime() {
+  echo $1 >> $TMP/$2.txt
+}
+
+getHash() {
+  step 1
+  stepavg 1
+  start
+
+  if [ "$1" != "" ]; then
+    echo -e "${BOLD}Using passed-in hash for deployment => ${1}${BOLDOFF}"
+    HASH=$1
+  else
+    # Force a specific commit hash by commenting-out the following line
+    echo "$(git -C $CODE_LOCATION rev-parse HEAD | cut -b 1-6)-$(date +%Y%m%d-%H%M)" > $TMP/commit_hash.txt
+    HASH=$(cat $TMP/commit_hash.txt)
+  fi
+
+  echo -e "Using commit hash: ${BOLD}${HASH}${BOLDOFF}"
+  stop
+  saveTime $STOP 1
+}
+
+packWebAMI() {
+  step 2
+  stepavg 2
+  start
+
+  EXISTING_AMI=$(aws ec2 describe-images --owners self --filters "Name=name,Values=webserver-${DEPLOY_ENV}-${HASH}")
+  if [ "$(echo $EXISTING_AMI | wc -w)" -lt 10 ]; then
+    echo "AMI for webserver-${DEPLOY_ENV}-${HASH} not found...creating"
+    $PACKER build -machine-readable -color=false -var "commit=${HASH}" packer/web/webserver-${DEPLOY_ENV}-packer.json | tee $TMP/packerlog.txt
+    cat $TMP/packerlog.txt | sed -n 's/^.*amazon-ebs,artifact.*AMIs were created.*\(ami.*\)$/\1/gp' > $TMP/current_ami.txt
+    # Check ami length, if 0 then abort
+    if [ $(wc -c < "$TMP/current_ami.txt") -eq 0 ]; then
+      echo "AMI build failure, bailing..."
+      exit 1
+    fi
+
+    AMI=$(cat $TMP/current_ami.txt)
+  else
+    AMI=$(echo $EXISTING_AMI | python -c "import json,sys;j=json.load(sys.stdin);print j['Images'][0]['ImageId']")
+    echo "Re-deploying using existing AMI"
+  fi
+
+  echo "AMI id: $AMI"
+  stop
+  saveTime $STOP 2
+}
+
+packBeatAMI() {
+  step 3
+  stepavg 3
+  start
+
+  EXISTING_BEATAMI=$(aws ec2 describe-images --owners self --filters "Name=name,Values=celerybeat-${DEPLOY_ENV}-${HASH}")
+
+  if [ "$(echo $EXISTING_BEATAMI | wc -w)" -lt 10 ]; then
+    echo "AMI for celerybeat-${DEPLOY_ENV}-${HASH} not found...creating"
+    $PACKER build -machine-readable -color=false -var "commit=${HASH}" packer/celerybeat/celerybeat-${DEPLOY_ENV}-packer.json | tee $TMP/beatpackerlog.txt
+    cat $TMP/beatpackerlog.txt | sed -n 's/^.*amazon-ebs,artifact.*AMIs were created.*\(ami.*\)$/\1/gp' > $TMP/beatcurrent_ami.txt
+    # Check ami length, if 0 then abort
+    if [ $(wc -c < "$TMP/beatcurrent_ami.txt") -eq 0 ]; then
+      echo "Beat AMI build failure, bailing..."
+      exit 1
+    fi
+
+    BEATAMI=$(cat $TMP/beatcurrent_ami.txt)
+  else
+    BEATAMI=$(echo $EXISTING_BEATAMI | python -c "import json,sys;j=json.load(sys.stdin);print j['Images'][0]['ImageId']")
+    echo "Re-deploying using existing beat AMI"
+  fi
+
+  echo -e "BEAT AMI id: ${BOLD}$BEATAMI${BOLDOFF}"
+  stop
+  saveTime $STOP 3
+}
+
+deploy() {
+  step 4
+  stepavg 4
+  start
+
+  if [ "$DBUSER" != "" ]; then
+    #echo python deploy.py deploy --env $DEPLOY_ENV --s3cors $URL --ami $AMI --beatami $BEATAMI --commithash $HASH --dbpass $DBPASS --dbuser $DBUSER
+    python deploy.py deploy --env $DEPLOY_ENV --s3cors $URL --ami $AMI --beatami $BEATAMI --commithash $HASH --dbpass $DBPASS --dbuser $DBUSER
+  else
+    #echo python deploy.py deploy --env $DEPLOY_ENV --s3cors $URL --ami $AMI --beatami $BEATAMI --commithash $HASH
+    python deploy.py deploy --env $DEPLOY_ENV --s3cors $URL --ami $AMI --beatami $BEATAMI --commithash $HASH
+  fi
+
+  stop
+  saveTime $STOP 4
+}
+
+maintOn() {
+  step 5
+  stepavg 5
+  start
+
+  CURRENT_TAG="tag_Name_web_server_${DEPLOY_ENV}_$(echo $HASH | tr - _)"
+  echo "Current web tags: $CURRENT_TAG"
+
+  # Make sure that the new servers aren't included in the set to show the maintenance mode on
+  MAINT_HOSTS=$(python hosts/ec2.py | python to_inventory.py tag_Group_web_server_${DEPLOY_ENV} $CURRENT_TAG)
+  PRIMARY_HOST=$(python hosts/ec2.py | python to_inventory.py $CURRENT_TAG | sed -e "s/,.*//g"),
+
+  if [ "$RUN_MIGRATIONS" != "0" ]; then
+    if [ "$MAINT_HOSTS" != "" ]; then
+      echo "Hosts to apply maintenance mode: $MAINT_HOSTS"
+      # echo ansible-playbook -vvvv -i $MAINT_HOSTS webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE
+      ansible-playbook -vvvv -i $MAINT_HOSTS webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE
+    else
+      echo "No hosts need to be set to maintenance mode, skipping..."
+    fi
+  fi
+
+  stop
+  saveTime $STOP 5
+}
+
+migrateCollectStatic() {
+  step 6
+  stepavg 6
+  start
+
+  # Now, collectstatic, etc on the first current server
+  NEW_HOSTS=$(python hosts/ec2.py | python to_inventory.py $CURRENT_TAG)
+  echo -e "New web IP addresses: ${BOLD}$NEW_HOSTS${BOLDOFF}"
+  FIRST_NEW_HOST=$(echo $NEW_HOSTS | cut -d, -f 1)
+  echo "Host to run collectstatic/migrations on: $FIRST_NEW_HOST"
+  echo "Waiting for SSH to open..."
+
   SSH_CMD="ssh -i $PRIVATE_KEY_FILE -o ConnectTimeout=5 -o StrictHostKeyChecking=no ubuntu@$FIRST_NEW_HOST exit 2>&1"
-else
-  SSH_CMD="ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no ubuntu@$FIRST_NEW_HOST exit 2>&1"
-fi
 
-set +e
-eval $SSH_CMD
-OPEN=$?
-
-while [ "$OPEN" -gt 0 ]; do
+  set +e
   eval $SSH_CMD
   OPEN=$?
-  echo SSH not open on $FIRST_NEW_HOST
-  sleep 20
-done
 
-set -e
+  while [ "$OPEN" -gt 0 ]; do
+    eval $SSH_CMD
+    OPEN=$?
+    echo "SSH not open on $FIRST_NEW_HOST"
+    sleep 20
+  done
 
-# $(ssh -t -i $PRIVATE_KEY_FILE ubuntu@$FIRST_NEW_HOST << EOF
-# sudo -u firecares sh -c "cd /webapps/firecares/; . bin/activate; cd firecares; python manage.py migrate --list | grep '\[\s\]'"
-# EOF
-# )
+  set -e
 
-if [ "$RUN_MIGRATIONS" != "0" ]; then
-  if [ "$PRIVATE_KEY_FILE" != "" ]; then
-    echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic,django.generate_sitemap" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes, generate_sitemap=yes" --private-key=$PRIVATE_KEY_FILE --limit "$CURRENT_TAG[0]"
-    ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic,django.generate_sitemap" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes, generate_sitemap=yes" --private-key=$PRIVATE_KEY_FILE --limit "$CURRENT_TAG[0]"
+  # $(ssh -t -i $PRIVATE_KEY_FILE ubuntu@$FIRST_NEW_HOST << EOF
+  # sudo -u firecares sh -c "cd /webapps/firecares/; . bin/activate; cd firecares; python manage.py migrate --list | grep '\[\s\]'"
+  # EOF
+  # )
+
+  if [ "$RUN_MIGRATIONS" != "0" ]; then
+    # echo ansible-playbook -vvvv -i $PRIMARY_HOST webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic,django.generate_sitemap" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes, generate_sitemap=yes" --private-key=$PRIVATE_KEY_FILE
+    ansible-playbook -vvvv -i $PRIMARY_HOST webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic,django.generate_sitemap" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes, generate_sitemap=yes" --private-key=$PRIVATE_KEY_FILE
   else
-    echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic,django.generate_sitemap" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes, generate_sitemap=yes" --limit "$CURRENT_TAG[0]"
-    ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic,django.generate_sitemap" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes, generate_sitemap=yes" --limit "$CURRENT_TAG[0]"
+    # echo ansible-playbook -vvvv -i $PRIMARY_HOST webservers-${DEPLOY_ENV}.yml --tags "django.collectstatic" --extra-vars="run_django_collectstatic=yes" --private-key=$PRIVATE_KEY_FILE
+    ansible-playbook -vvvv -i $PRIMARY_HOST webservers-${DEPLOY_ENV}.yml --tags "django.collectstatic" --extra-vars="run_django_collectstatic=yes" --private-key=$PRIVATE_KEY_FILE
   fi
-else
-  if [ "$PRIVATE_KEY_FILE" != "" ]; then
-    echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.collectstatic" --extra-vars="run_django_collectstatic=yes" --private-key=$PRIVATE_KEY_FILE --limit "$CURRENT_TAG[0]"
-    ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.collectstatic" --extra-vars="run_django_collectstatic=yes" --private-key=$PRIVATE_KEY_FILE --limit "$CURRENT_TAG[0]"
-  else
-    echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.collectstatic" --extra-vars="run_django_collectstatic=yes" --limit "$CURRENT_TAG[0]"
-    ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "django.collectstatic" --extra-vars="run_django_collectstatic=yes" --limit "$CURRENT_TAG[0]"
-  fi
-fi
 
-# Now, we can switch DNS over
+  stop
+  saveTime $STOP 6
+}
+
+dnsSwitch() {
+  step 7
+  stepavg 7
+  start
+  # Now, we can switch DNS over
 python - <<- EOF
 import sys
 from boto.ec2 import elb
@@ -167,18 +267,38 @@ rrs.commit()
 print 'Set $DNS ALIAS to {alias}'.format(alias=dest)
 EOF
 
-# Wait for a little bit before spinning down the old webservers
-sleep 120
+  stop
+  saveTime $STOP 7
+}
 
-if [ "$MAINT_HOSTS" != "" ]; then
-  echo Hosts to turn off: $MAINT_HOSTS
-  if [ "$PRIVATE_KEY_FILE" != "" ]; then
-    echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
-    ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
+maintOff() {
+  step 8
+  stepavg 8
+  start
+
+  if [ "$MAINT_HOSTS" != "" ]; then
+    # Wait for a little bit before spinning down the old webservers
+    sleep 120
+    echo "Hosts to turn off: $MAINT_HOSTS"
+    # echo ansible-playbook -vvvv -i $MAINT_HOSTS webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE
+    ansible-playbook -vvvv -i $MAINT_HOSTS webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE
   else
-    echo ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
-    ansible-playbook -vvvv -i hosts webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --limit "tag_Group_web_server_${DEPLOY_ENV}:"'!'"$CURRENT_TAG"
+    echo "No hosts need to be spun down..."
   fi
-else
-  echo No hosts need to be spun down...
-fi
+
+  stop
+  saveTime $STOP 8
+}
+
+echo "Started: $(date)"
+getHash $EXISTING_HASH # Force a redeploy by passing a specific commit hash to "getHash", eg. getHash "3efcc2-20170906-1613", skips the packer steps
+packWebAMI
+packBeatAMI
+deploy
+maintOn
+migrateCollectStatic
+dnsSwitch
+maintOff
+echo "Ended: $(date)"
+echo -e "${BOLD}Took: $(( `date +%s` - $START )) seconds${BOLDOFF}"
+echo $(( `date +%s` - $START )) >> $TMP/duration.txt

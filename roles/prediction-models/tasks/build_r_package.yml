@@ -1,0 +1,7 @@
+---
+
+- name: Build pkgFireCARES
+  command: >
+    R CMD INSTALL .
+  args:
+    chdir: "{{ virtualenv_path }}/src/fire-risk/r_code/pkgFireCARES"
