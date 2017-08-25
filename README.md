@@ -117,6 +117,18 @@ sudo su firecares
 workon firecares
 ```
 
+## Deployment
+
+There are quite a few steps necessary to setup a new full FireCARES environment in AWS; however, in order to display to production (https://firecares.org) or test (https://test.firecares.org), all that is needed to be done is execute one of the following scripts:
+
+- `./deploy-test.sh`
+- `./deploy-prod.sh`
+
+Additionally, there are some helper scripts to make common operations a little simpler:
+
+- `./cur_prod.sh` -- dumps the IP address of the current production machines (active and previous deployment/rollback)
+- `./maint_mode.sh` -- apply/unapply maintenance mode to production (eg. `MODE=on ./main_mode.sh` turns on maintenance mode and `MODE=off ./main_mode.sh`)
+
 ## Debugging in Pycharm
 You can use Pycharm to put breakpoints and perform typical IDE debugging tasks. See [this documentation](https://docs.google.com/document/d/1pX_wMXvgKCkCNdno_wdsHhsXcfiiPW8NOZaM_H-FAno/) for instructions
 
