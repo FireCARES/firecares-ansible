@@ -29,19 +29,21 @@ def delete_firecares_stack(stack_or_name):
     if not isinstance(stack_or_name, Stack):
         stack_or_name = conn.describe_stacks(stack_name_or_id=stack_or_name)[0]
 
-    old_sg = get_web_security_group(stack_or_name).value
+    old_sg = get_web_security_group(stack_or_name)
+    if old_sg:
+        old_sg = old_sg.value
 
-    click.echo('Revoking access from security group {} to NFIRS.'.format(old_sg))
-    ec2.revoke_security_group(group_id='sg-13fd9e77', src_security_group_group_id=old_sg, ip_protocol='tcp',
-                              from_port=5432, to_port=5432)
+        click.echo('Revoking access from security group {} to NFIRS.'.format(old_sg))
+        ec2.revoke_security_group(group_id='sg-13fd9e77', src_security_group_group_id=old_sg, ip_protocol='tcp',
+                                  from_port=5432, to_port=5432)
 
-    click.echo('Revoking access from security group {} to ELK.'.format(old_sg))
-    ec2.revoke_security_group(group_id='sg-f1ce248e', src_security_group_group_id=old_sg, ip_protocol='tcp',
-                              from_port=5043, to_port=5043)
+        click.echo('Revoking access from security group {} to ELK.'.format(old_sg))
+        ec2.revoke_security_group(group_id='sg-f1ce248e', src_security_group_group_id=old_sg, ip_protocol='tcp',
+                                  from_port=5043, to_port=5043)
 
-    click.echo('Revoking access from security group {} to memcached'.format(old_sg))
-    ec2.revoke_security_group(group_id='sg-8163f8e6', src_security_group_group_id=old_sg, ip_protocol='tcp',
-                              from_port=11211, to_port=11211)
+        click.echo('Revoking access from security group {} to memcached'.format(old_sg))
+        ec2.revoke_security_group(group_id='sg-8163f8e6', src_security_group_group_id=old_sg, ip_protocol='tcp',
+                                  from_port=11211, to_port=11211)
 
     click.echo('Deleting stack: {}'.format(stack_or_name.stack_name))
     conn.delete_stack(stack_or_name.stack_name)
