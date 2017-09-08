@@ -3,6 +3,7 @@ import time
 import sh
 import os
 import datetime
+import re
 import sys
 from tabulate import tabulate
 from boto.cloudformation.connection import CloudFormationConnection
@@ -10,6 +11,8 @@ from boto.cloudformation.stack import Stack
 from boto import connect_ec2
 from boto.exception import BotoServerError, EC2ResponseError
 from boto.ec2 import elb
+from boto.ec2.autoscale import AutoScaleConnection
+from boto.ec2.connection import EC2Connection
 from boto.route53 import connect_to_region
 from boto.route53.record import ResourceRecordSets
 from stacks.firecares_db import t as db_server_stack
@@ -172,7 +175,6 @@ def switch_dns(env, hash):
 
     elb_conn = elb.connect_to_region('us-east-1')
     r_conn = connect_to_region('us-east-1')
-    import pudb; pudb.set_trace()
 
     lbs = elb_conn.get_all_load_balancers()
     fclbs = sorted(filter(lambda x: x.name.startwith('fc-{}'.format(env)), lbs), key=lambda x: x.name)
@@ -312,18 +314,80 @@ def delete_stack(name):
     delete_firecares_stack(name)
 
 
+def get_deployed_web_stack(env):
+    conn = CloudFormationConnection()
+    r_conn = connect_to_region('us-east-1')
+    zone = r_conn.get_zone('firecares.org')
+
+    if env == 'dev':
+        dns = get_dns_root(zone.get_a('test.firecares.org').alias_dns_name)
+    elif env == 'prod':
+        dns = get_dns_root(zone.get_a('firecares.org').alias_dns_name)
+
+    to_prune = 'firecares-{env}-web-'.format(env=env)
+    stacks = [x for x in conn.describe_stacks() if x.stack_name.startswith(to_prune) and dns in x.stack_name]
+    return next(iter(stacks), None)
+
+
+def get_dns_root(s):
+    return re.match('dualstack\.fc-(prod|dev)-(.*)-\d+\.us-east-1\.elb\.amazonaws\.com\.', s).groups()[1]
+
+
+@firecares_deploy.command()
+@click.option('--env', default='dev', help='Environment (dev|prod)')
+@click.option('--onlyweb', default=False, is_flag=True)
+@click.option('--onlybeat', default=False, is_flag=True)
+def list_machines(env, onlyweb, onlybeat):
+    econn = EC2Connection()
+    agconn = AutoScaleConnection()
+    cfconn = CloudFormationConnection()
+    stack = get_deployed_web_stack(env)
+
+    verbose = not onlyweb and not onlybeat
+
+    if onlyweb or verbose:
+        asg_id = stack.describe_resources('WebserverAutoScale')[0].physical_resource_id
+        # Get web instances in the autoscaling group
+        asg = agconn.get_all_groups([asg_id])[0]
+        inst_ids = [i.instance_id for i in asg.instances]
+        reservations = econn.get_all_instances(instance_ids=inst_ids)
+        instances = [i.public_dns_name for r in reservations for i in r.instances]
+        click.secho('{}{}'.format('web: ' if verbose else '', ','.join(instances)))
+
+    # Get beat instance in stack
+    if onlybeat or verbose:
+        beat = stack.describe_resources('BeatInstance')
+        if beat:
+            beat_id = beat[0].physical_resource_id
+            beatinst = econn.get_all_instances(instance_ids=[beat_id])[0].instances[0]
+            click.secho('{}{}'.format('beat: ' if verbose else '', beatinst.public_dns_name))
+
 @firecares_deploy.command()
 def list_stacks():
     """
     Display FireCARES CloudFormation stacks.
     """
     conn = CloudFormationConnection()
+    econn = EC2Connection()
+    r_conn = connect_to_region('us-east-1')
+    zone = r_conn.get_zone('firecares.org')
+
+    test = zone.get_a('test.firecares.org').alias_dns_name
+    prod = zone.get_a('firecares.org').alias_dns_name
 
     def get_failures(stack):
         return ' | '.join(set([x.resource_status_reason for x in stack.describe_events()[:10] if x.resource_status.endswith('FAILED')]))
 
-    rows = [[x.stack_name, x.stack_status, x.creation_time.isoformat(), get_failures(x)] for x in conn.describe_stacks() if x.stack_name.startswith('firecares')]
-    click.secho(tabulate(rows, headers=['NAME', 'STATUS', 'CREATED AT', 'ERRORS']))
+    def get_deployed(stack):
+        if 'dev-web' in stack.stack_name:
+            if get_dns_root(test) == stack.stack_name.strip('firecares-dev-web-'):
+                return 'test.firecares.org'
+        elif 'prod-web' in stack.stack_name:
+            if get_dns_root(prod) == stack.stack_name.strip('firecares-prod-web-'):
+                return 'firecares.org'
+
+    rows = [[x.stack_name, x.stack_status, x.creation_time.isoformat(), get_deployed(x), get_failures(x)] for x in conn.describe_stacks() if x.stack_name.startswith('firecares')]
+    click.secho(tabulate(rows, headers=['NAME', 'STATUS', 'CREATED AT', 'LIVE @', 'ERRORS']))
 
 
 if __name__ == '__main__':

@@ -132,6 +132,17 @@ Additionally, there are some helper scripts to make common operations a little s
 ## Debugging in Pycharm
 You can use Pycharm to put breakpoints and perform typical IDE debugging tasks. See [this documentation](https://docs.google.com/document/d/1pX_wMXvgKCkCNdno_wdsHhsXcfiiPW8NOZaM_H-FAno/) for instructions
 
+## Infrastructure Tests
+
+To run infrastructure sanity checks, ensure that `StrictHostKeyChecking` is off for AWS in your `~/.ssh/config`:
+
+```
+Host *.compute.amazonaws.com
+    StrictHostKeyChecking no
+```
+
+Then, run: `./test.sh` to perform sanity checks on the currently deployed development environment; likewise, run: `ENV=prod ./test.sh` to test the active production environment.
+
 ## Useful Links
 
 - [Ansible - Getting Started](http://docs.ansible.com/intro_getting_started.html)

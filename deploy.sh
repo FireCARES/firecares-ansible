@@ -17,6 +17,7 @@ BOLD="\033[1m"
 BOLDOFF="\033[0m"
 START=$(date +%s)
 STEPS=8
+EXISTING=0
 
 if [ "$DBUSER" != "" ]; then
   echo "Using user: ${DBUSER} for database"
@@ -50,7 +51,7 @@ stepavg() {
 
 step() {
   CURSTEP=$1
-  echo -e "${BOLD}STEP [$1/${STEPS}]${BOLDOFF}"
+  echo -e "${BOLD}STEP [$1/${STEPS}]${BOLDOFF} $2"
 }
 
 start() {
@@ -66,13 +67,14 @@ saveTime() {
 }
 
 getHash() {
-  step 1
+  step 1 "Get commit hash"
   stepavg 1
   start
 
   if [ "$1" != "" ]; then
     echo -e "${BOLD}Using passed-in hash for deployment => ${1}${BOLDOFF}"
     HASH=$1
+    EXISTING=1
   else
     # Force a specific commit hash by commenting-out the following line
     echo "$(git -C $CODE_LOCATION rev-parse HEAD | cut -b 1-6)-$(date +%Y%m%d-%H%M)" > $TMP/commit_hash.txt
@@ -85,7 +87,7 @@ getHash() {
 }
 
 packWebAMI() {
-  step 2
+  step 2 "Pack web AMI"
   stepavg 2
   start
 
@@ -108,11 +110,13 @@ packWebAMI() {
 
   echo "AMI id: $AMI"
   stop
-  saveTime $STOP 2
+  if [ "$EXISTING" -eq "0" ]; then
+    saveTime $STOP 2
+  fi
 }
 
 packBeatAMI() {
-  step 3
+  step 3 "Pack beat AMI"
   stepavg 3
   start
 
@@ -136,7 +140,9 @@ packBeatAMI() {
 
   echo -e "BEAT AMI id: ${BOLD}$BEATAMI${BOLDOFF}"
   stop
-  saveTime $STOP 3
+  if [ "$EXISTING" -eq "0" ]; then
+    saveTime $STOP 3
+  fi
 }
 
 deploy() {

@@ -3,4 +3,6 @@ boto==2.45.0
 click==6.7
 tabulate==0.7.5
 troposphere==1.9.2
-sh
+sh==1.12.14
+testinfra==1.6.5
+paramiko==2.2.1

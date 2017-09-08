@@ -12,3 +12,4 @@ node_modules/
 /manifest.json
 *.retry
 /tmp
+.cache
