@@ -24,3 +24,8 @@
       - glmnet
       - ranger
       - RPostgreSQL
+
+- name: Install Census API key
+  command: >
+    Rscript --slave --no-save --no-restore-history -e "library(acs); api.key.install('{{ census_api_key }}')"
+  when: census_api_key is defined

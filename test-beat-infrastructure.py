@@ -39,6 +39,6 @@ def test_celery_running(host):
         assert host.supervisor('celery').is_running
 
 
-def test_gunicorn_stopped(host):
+def test_gunicorn_not_running(host):
     with host.sudo():
-        assert not host.supervisor('firecares').is_running
+        assert host.process.filter(comm='gunicorn') == []
