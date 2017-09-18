@@ -24,6 +24,7 @@
       - glmnet
       - ranger
       - RPostgreSQL
+      - lme4
 
 - name: Install Census API key
   command: >
