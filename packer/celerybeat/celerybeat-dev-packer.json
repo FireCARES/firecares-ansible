@@ -12,7 +12,7 @@
     "source_ami": "ami-67bba31c",
     "instance_type": "t2.small",
     "ssh_username": "ubuntu",
-    "ssh_timeout": "5m",
+    "ssh_timeout": "10m",
     "ami_name": "celerybeat-dev-{{user `commit`}}"
   }],
   "provisioners": [{
