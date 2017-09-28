@@ -6,3 +6,5 @@ troposphere==1.9.2
 sh==1.12.14
 testinfra==1.6.5
 paramiko==2.2.1
+pytz
+python-dateutil

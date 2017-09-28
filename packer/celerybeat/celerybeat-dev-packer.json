@@ -36,7 +36,7 @@
       "role_paths": [
         "roles/"
       ],
-      "extra_arguments": ["--extra-vars \"celery_queues=singlenode run_beat=true\" --skip-tags \"nginx,supervisor\""]
+      "extra_arguments": ["--extra-vars \"celery_queues=singlenode,weather-task run_beat=true\" --skip-tags \"nginx,supervisor\""]
     }
   ],
   "post-processors": [{

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ENV=${ENV:-dev}
+# Env = dev|prod
 
 WEB_HOSTS=$(python deploy.py list_machines --env=$ENV --onlyweb)
 BEAT_HOSTS=$(python deploy.py list_machines --env=$ENV --onlybeat)

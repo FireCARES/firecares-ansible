@@ -137,20 +137,6 @@ def test(env, hash, path):
         print r,
 
 
-def _delete_old_stacks(ami=None, keep=2, env='dev'):
-    conn = CloudFormationConnection()
-    # If there are old stacks, flag them for deletion
-    name = 'firecares-{}-web'.format(env)
-    old_stacks = [n for n in conn.describe_stacks() if name in n.stack_name and (not ami or ami not in n.stack_name)]
-    # Keep 2 stacks by default so that we don't have any potential downtime
-    old_stacks = sorted(old_stacks, key=lambda x: x.creation_time, reverse=True)[keep:]
-    click.secho("Deleting {count} stacks...".format(count=len(old_stacks)))
-    for old_stack in old_stacks:
-        click.secho("Deleting {}".format(old_stack.stack_name))
-        delete_firecares_stack(old_stack)
-    click.secho("Done")
-
-
 @firecares_deploy.command()
 @click.option('--env', default='dev', help='Environment (dev|prod)')
 @click.option('--commithash', default='')
@@ -213,12 +199,16 @@ def switch_dns(env, hash):
 @click.option('--dbpass', help='Database password from firecares-db stack.')
 @click.option('--dbuser', help='Database user from firecares-db stack.')
 @click.option('--s3cors', default='*', help='S3 CORS allowed hosts')
-def deploy(ami, beatami, env, commithash, dbpass, dbuser, s3cors):
+@click.option('--keep', default=2, help='Number of CloudFormation stacks to keep (including currently deployed)')
+def deploy(ami, beatami, env, commithash, dbpass, dbuser, s3cors, keep):
     """
     Deploys a firecares environment/CloudFormation stack w/ security group tweaks.
 
     Note: This currently assumes the db stack is already created.
     """
+
+    if keep < 2:
+        keep = 1
     conn = CloudFormationConnection()
     ec2 = connect_ec2()
 
@@ -302,7 +292,7 @@ def deploy(ami, beatami, env, commithash, dbpass, dbuser, s3cors):
         except EC2ResponseError:
             click.secho('memcached web security group already exists.')
 
-    _delete_old_stacks(ami=ami, env=env)
+    _delete_old_stacks(ami=ami, env=env, keep=keep)
 
 
 @firecares_deploy.command()

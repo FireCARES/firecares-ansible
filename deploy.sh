@@ -18,6 +18,7 @@ BOLDOFF="\033[0m"
 START=$(date +%s)
 STEPS=8
 EXISTING=0
+KEEP=${KEEP:-2}
 
 if [ "$DBUSER" != "" ]; then
   echo "Using user: ${DBUSER} for database"
@@ -95,7 +96,7 @@ packWebAMI() {
   if [ "$(echo $EXISTING_AMI | wc -w)" -lt 10 ]; then
     echo "AMI for webserver-${DEPLOY_ENV}-${HASH} not found...creating"
     $PACKER build -machine-readable -color=false -var "commit=${HASH}" packer/web/webserver-${DEPLOY_ENV}-packer.json | tee $TMP/packerlog.txt
-    cat $TMP/packerlog.txt | sed -n 's/^.*amazon-ebs,artifact.*AMIs were created.*\(ami.*\)$/\1/gp' > $TMP/current_ami.txt
+    cat $TMP/packerlog.txt | sed -n 's/^.*amazon-ebs,artifact.*AMIs were created.*\(ami-[0-9a-zA-Z]*\)\\n$/\1/gp' > $TMP/current_ami.txt
     # Check ami length, if 0 then abort
     if [ $(wc -c < "$TMP/current_ami.txt") -eq 0 ]; then
       echo "AMI build failure, bailing..."
@@ -125,7 +126,7 @@ packBeatAMI() {
   if [ "$(echo $EXISTING_BEATAMI | wc -w)" -lt 10 ]; then
     echo "AMI for celerybeat-${DEPLOY_ENV}-${HASH} not found...creating"
     $PACKER build -machine-readable -color=false -var "commit=${HASH}" packer/celerybeat/celerybeat-${DEPLOY_ENV}-packer.json | tee $TMP/beatpackerlog.txt
-    cat $TMP/beatpackerlog.txt | sed -n 's/^.*amazon-ebs,artifact.*AMIs were created.*\(ami.*\)$/\1/gp' > $TMP/beatcurrent_ami.txt
+    cat $TMP/beatpackerlog.txt | sed -n 's/^.*amazon-ebs,artifact.*AMIs were created.*\(ami-[0-9a-z]*\)\\n$/\1/gp' > $TMP/beatcurrent_ami.txt
     # Check ami length, if 0 then abort
     if [ $(wc -c < "$TMP/beatcurrent_ami.txt") -eq 0 ]; then
       echo "Beat AMI build failure, bailing..."
@@ -152,10 +153,10 @@ deploy() {
 
   if [ "$DBUSER" != "" ]; then
     #echo python deploy.py deploy --env $DEPLOY_ENV --s3cors $URL --ami $AMI --beatami $BEATAMI --commithash $HASH --dbpass $DBPASS --dbuser $DBUSER
-    python deploy.py deploy --env $DEPLOY_ENV --s3cors $URL --ami $AMI --beatami $BEATAMI --commithash $HASH --dbpass $DBPASS --dbuser $DBUSER
+    python deploy.py deploy --env $DEPLOY_ENV --s3cors $URL --ami $AMI --beatami $BEATAMI --commithash $HASH --keep $KEEP --dbpass $DBPASS --dbuser $DBUSER
   else
     #echo python deploy.py deploy --env $DEPLOY_ENV --s3cors $URL --ami $AMI --beatami $BEATAMI --commithash $HASH
-    python deploy.py deploy --env $DEPLOY_ENV --s3cors $URL --ami $AMI --beatami $BEATAMI --commithash $HASH
+    python deploy.py deploy --env $DEPLOY_ENV --s3cors $URL --ami $AMI --beatami $BEATAMI --commithash $HASH --keep $KEEP
   fi
 
   stop
