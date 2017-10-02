@@ -327,7 +327,8 @@ def get_dns_root(s):
 @click.option('--env', default='dev', help='Environment (dev|prod)')
 @click.option('--onlyweb', default=False, is_flag=True)
 @click.option('--onlybeat', default=False, is_flag=True)
-def list_machines(env, onlyweb, onlybeat):
+@click.option('--showprivate', default=False, is_flag=True)
+def list_machines(env, onlyweb, onlybeat, showprivate):
     econn = EC2Connection()
     agconn = AutoScaleConnection()
     cfconn = CloudFormationConnection()
@@ -342,7 +343,10 @@ def list_machines(env, onlyweb, onlybeat):
         inst_ids = [i.instance_id for i in asg.instances]
         reservations = econn.get_all_instances(instance_ids=inst_ids)
         instances = [i.public_dns_name for r in reservations for i in r.instances]
+        priv_instances = [i.private_dns_name for r in reservations for i in r.instances]
         click.secho('{}{}'.format('web: ' if verbose else '', ','.join(instances)))
+        if showprivate:
+            click.secho('{}{}'.format('web (private): ' if verbose else '', ','.join(priv_instances)))
 
     # Get beat instance in stack
     if onlybeat or verbose:
@@ -351,6 +355,8 @@ def list_machines(env, onlyweb, onlybeat):
             beat_id = beat[0].physical_resource_id
             beatinst = econn.get_all_instances(instance_ids=[beat_id])[0].instances[0]
             click.secho('{}{}'.format('beat: ' if verbose else '', beatinst.public_dns_name))
+            if showprivate:
+                click.secho('{}{}'.format('beat (private): ' if verbose else '', beatinst.private_dns_name))
 
 @firecares_deploy.command()
 def list_stacks():

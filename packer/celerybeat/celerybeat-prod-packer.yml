@@ -1,0 +1,30 @@
+---
+- name: Create a {{ application_name }} celery beat box / celery worker
+  hosts: localhost
+  sudo: yes
+  sudo_user: root
+  remote_user: ubuntu
+  vars:
+    - setup_git_repo: yes
+    - update_apt_cache: yes
+    - run_django_sync_db: no
+    - run_django_db_migrations: no
+    - run_django_collectstatic: no
+    - deployment_env: prod
+
+  vars_files:
+    - env_vars/base.yml
+    - env_vars/production.yml
+
+  environment:
+      AWS_ACCESS_KEY_ID: "{{ aws_access_key_id }}"
+      AWS_SECRET_ACCESS_KEY: "{{ aws_secret_access_key }}"
+
+  roles:
+    - base
+    - memcached
+    - web
+    - celery
+    - filebeat
+    - metricbeat
+    - prediction-models

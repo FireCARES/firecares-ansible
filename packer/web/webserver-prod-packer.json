@@ -12,7 +12,7 @@
     "source_ami": "ami-99da6c8f",
     "instance_type": "t2.small",
     "ssh_username": "ubuntu",
-    "ssh_timeout": "5m",
+    "ssh_timeout": "10m",
     "ami_name": "webserver-prod-{{user `commit`}}"
   }],
   "provisioners": [
