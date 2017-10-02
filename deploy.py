@@ -304,7 +304,7 @@ def delete_stack(name):
     delete_firecares_stack(name)
 
 
-def get_deployed_web_stack(env):
+def get_web_stacks(env, deployed=True):
     conn = CloudFormationConnection()
     r_conn = connect_to_region('us-east-1')
     zone = r_conn.get_zone('firecares.org')
@@ -315,8 +315,10 @@ def get_deployed_web_stack(env):
         dns = get_dns_root(zone.get_a('firecares.org').alias_dns_name)
 
     to_prune = 'firecares-{env}-web-'.format(env=env)
-    stacks = [x for x in conn.describe_stacks() if x.stack_name.startswith(to_prune) and dns in x.stack_name]
-    return next(iter(stacks), None)
+    if deployed:
+        return [x for x in conn.describe_stacks() if x.stack_name.startswith(to_prune) and dns in x.stack_name]
+    else:
+        return [x for x in conn.describe_stacks() if x.stack_name.startswith(to_prune) and dns not in x.stack_name]
 
 
 def get_dns_root(s):
@@ -328,35 +330,40 @@ def get_dns_root(s):
 @click.option('--onlyweb', default=False, is_flag=True)
 @click.option('--onlybeat', default=False, is_flag=True)
 @click.option('--showprivate', default=False, is_flag=True)
-def list_machines(env, onlyweb, onlybeat, showprivate):
+@click.option('--onlyold', default=False, is_flag=True)
+def list_machines(env, onlyweb, onlybeat, showprivate, onlyold):
     econn = EC2Connection()
     agconn = AutoScaleConnection()
     cfconn = CloudFormationConnection()
-    stack = get_deployed_web_stack(env)
+    stacks = get_web_stacks(env, deployed=not onlyold)
+
+    if not stacks:
+        sys.exit(1)
 
     verbose = not onlyweb and not onlybeat
 
-    if onlyweb or verbose:
-        asg_id = stack.describe_resources('WebserverAutoScale')[0].physical_resource_id
-        # Get web instances in the autoscaling group
-        asg = agconn.get_all_groups([asg_id])[0]
-        inst_ids = [i.instance_id for i in asg.instances]
-        reservations = econn.get_all_instances(instance_ids=inst_ids)
-        instances = [i.ip_address for r in reservations for i in r.instances]
-        priv_instances = [i.private_ip_address for r in reservations for i in r.instances]
-        click.secho('{}{}'.format('web: ' if verbose else '', ','.join(instances)))
-        if showprivate:
-            click.secho('{}{}'.format('web (private): ' if verbose else '', ','.join(priv_instances)))
-
-    # Get beat instance in stack
-    if onlybeat or verbose:
-        beat = stack.describe_resources('BeatInstance')
-        if beat:
-            beat_id = beat[0].physical_resource_id
-            beatinst = econn.get_all_instances(instance_ids=[beat_id])[0].instances[0]
-            click.secho('{}{}'.format('beat: ' if verbose else '', beatinst.ip_address))
+    for stack in stacks:
+        if onlyweb or verbose:
+            asg_id = stack.describe_resources('WebserverAutoScale')[0].physical_resource_id
+            # Get web instances in the autoscaling group
+            asg = agconn.get_all_groups([asg_id])[0]
+            inst_ids = [i.instance_id for i in asg.instances]
+            reservations = econn.get_all_instances(instance_ids=inst_ids)
+            instances = [i.ip_address for r in reservations for i in r.instances]
+            priv_instances = [i.private_ip_address for r in reservations for i in r.instances]
+            click.secho('{}{}'.format('web: ' if verbose else '', ','.join(instances)))
             if showprivate:
-                click.secho('{}{}'.format('beat (private): ' if verbose else '', beatinst.private_ip_address))
+                click.secho('{}{}'.format('web (private): ' if verbose else '', ','.join(priv_instances)))
+
+        # Get beat instance in stack
+        if onlybeat or verbose:
+            beat = stack.describe_resources('BeatInstance')
+            if beat:
+                beat_id = beat[0].physical_resource_id
+                beatinst = econn.get_all_instances(instance_ids=[beat_id])[0].instances[0]
+                click.secho('{}{}'.format('beat: ' if verbose else '', beatinst.ip_address))
+                if showprivate:
+                    click.secho('{}{}'.format('beat (private): ' if verbose else '', beatinst.private_ip_address))
 
 
 @firecares_deploy.command()
