@@ -3,6 +3,7 @@ ansible_ssh_user=ubuntu
 
 [tag_Name_rabbitmq_dev]
 [tag_Group_web_server_dev]
+[tag_Group_celerybeat_dev]
 
 [dev-rabbitmq:children]
 tag_Name_rabbitmq_dev
@@ -10,18 +11,25 @@ tag_Name_rabbitmq_dev
 [dev-webservers:children]
 tag_Group_web_server_dev
 
+[dev-celerybeats:children]
+tag_Group_celerybeat_dev
+
 [dev:children]
 dev-rabbitmq
 dev-webservers
 
 [tag_Name_rabbitmq_prod]
 [tag_Group_web_server_prod]
+[tag_Group_celerybeat_prod]
 
 [prod-rabbitmq:children]
 tag_Name_rabbitmq_prod
 
 [prod-webservers:children]
 tag_Group_web_server_prod
+
+[prod-celerybeats:children]
+tag_Group_celerybeat_prod
 
 [prod:children]
 prod-rabbitmq

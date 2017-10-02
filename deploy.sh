@@ -278,20 +278,31 @@ EOF
   saveTime $STOP 7
 }
 
-maintOff() {
+turnOffOld() {
   step 8
   stepavg 8
   start
 
-  if [ "$MAINT_HOSTS" != "" ]; then
-    # Wait for a little bit before spinning down the old webservers
-    sleep 120
-    echo "Hosts to turn off: $MAINT_HOSTS"
-    # echo ansible-playbook -vvvv -i $MAINT_HOSTS webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE
-    ansible-playbook -vvvv -i $MAINT_HOSTS webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE
-  else
-    echo "No hosts need to be spun down..."
-  fi
+  ALL_HOSTS=$(python hosts/ec2.py | jq "to_entries[] | select(.key | test(\"tag_Name_(celerybeat|web_server)_${DEPLOY_ENV}\")).value | join(\",\")" | paste -sd "," - | tr -d '\"')
+  echo $ALL_HOSTS
+
+  CURRENT_TAG="tag_Name_web_server_${DEPLOY_ENV}_$(echo $HASH | tr - _)"
+  CURRENT_BEAT_TAG="tag_Name_celerybeat_${DEPLOY_ENV}_$(echo $HASH | tr - _)"
+  echo "Current web tags: $CURRENT_TAG"
+
+  # Make sure that the new servers aren't included in the set to show the maintenance mode on
+  MAINT_HOSTS=$(python hosts/ec2.py | python to_inventory.py tag_Group_web_server_${DEPLOY_ENV} $CURRENT_TAG)
+
+  # Wait for a little bit before spinning down the old webservers/celery servers
+  sleep 60
+  echo "Web hosts to turn off: $MAINT_HOSTS"
+  # echo ansible-playbook -vvvv -i $MAINT_HOSTS webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE
+  ansible-playbook -vvvv webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit $MAINT_HOSTS
+
+  BEAT_MAINT_HOSTS=$(python hosts/ec2.py | python to_inventory.py tag_Group_celerybeat_${DEPLOY_ENV} $CURRENT_BEAT_TAG)
+
+  echo "Beat hosts to turn off: $BEAT_MAINT_HOSTS"
+  ansible-playbook -vvvv webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit $BEAT_MAINT_HOSTS
 
   stop
   saveTime $STOP 8
@@ -305,7 +316,7 @@ deploy
 maintOn
 migrateCollectStatic
 dnsSwitch
-maintOff
+turnOffOld
 echo "Ended: $(date)"
 echo -e "${BOLD}Took: $(( `date +%s` - $START )) seconds${BOLDOFF}"
 echo $(( `date +%s` - $START )) >> $TMP/duration.txt

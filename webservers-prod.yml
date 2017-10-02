@@ -1,6 +1,8 @@
 ---
 - name: Create a {{ application_name }} webserver
-  hosts: prod-webservers
+  hosts:
+    - prod-webservers
+    - prod-celerybeats
   sudo: yes
   sudo_user: root
   remote_user: ubuntu
