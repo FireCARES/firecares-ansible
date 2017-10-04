@@ -96,7 +96,7 @@ packWebAMI() {
   if [ "$(echo $EXISTING_AMI | wc -w)" -lt 10 ]; then
     echo "AMI for webserver-${DEPLOY_ENV}-${HASH} not found...creating"
     $PACKER build -machine-readable -color=false -var "commit=${HASH}" packer/web/webserver-${DEPLOY_ENV}-packer.json | tee $TMP/packerlog.txt
-    cat $TMP/packerlog.txt | sed -n 's/^.*amazon-ebs,artifact.*AMIs were created.*\(ami-[0-9a-zA-Z]*\)\\n$/\1/gp' > $TMP/current_ami.txt
+    cat $TMP/packerlog.txt | egrep 'artifact,0,id' | rev | cut -f1 -d: | rev > $TMP/current_ami.txt
     # Check ami length, if 0 then abort
     if [ $(wc -c < "$TMP/current_ami.txt") -eq 0 ]; then
       echo "AMI build failure, bailing..."
@@ -126,7 +126,7 @@ packBeatAMI() {
   if [ "$(echo $EXISTING_BEATAMI | wc -w)" -lt 10 ]; then
     echo "AMI for celerybeat-${DEPLOY_ENV}-${HASH} not found...creating"
     $PACKER build -machine-readable -color=false -var "commit=${HASH}" packer/celerybeat/celerybeat-${DEPLOY_ENV}-packer.json | tee $TMP/beatpackerlog.txt
-    cat $TMP/beatpackerlog.txt | sed -n 's/^.*amazon-ebs,artifact.*AMIs were created.*\(ami-[0-9a-z]*\)\\n$/\1/gp' > $TMP/beatcurrent_ami.txt
+    cat $TMP/beatpackerlog.txt | egrep 'artifact,0,id' | rev | cut -f1 -d: | rev > $TMP/beatcurrent_ami.txt
     # Check ami length, if 0 then abort
     if [ $(wc -c < "$TMP/beatcurrent_ami.txt") -eq 0 ]; then
       echo "Beat AMI build failure, bailing..."
@@ -293,16 +293,24 @@ turnOffOld() {
   # Make sure that the new servers aren't included in the set to show the maintenance mode on
   MAINT_HOSTS=$(python hosts/ec2.py | python to_inventory.py tag_Group_web_server_${DEPLOY_ENV} $CURRENT_TAG)
 
-  # Wait for a little bit before spinning down the old webservers/celery servers
-  sleep 60
-  echo "Web hosts to turn off: $MAINT_HOSTS"
-  # echo ansible-playbook -vvvv -i $MAINT_HOSTS webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE
-  ansible-playbook -vvvv webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit $MAINT_HOSTS
+  if [ "$MAIN_HOSTS" != "" ]; then
+    # Wait for a little bit before spinning down the old webservers/celery servers
+    sleep 60
+    echo "Web hosts to turn off: $MAINT_HOSTS"
+    # echo ansible-playbook -vvvv -i $MAINT_HOSTS webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE
+    ansible-playbook -vvvv webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit $MAINT_HOSTS
+  else
+    echo "No web hosts to turn off"
+  fi
 
-  BEAT_MAINT_HOSTS=$(python hosts/ec2.py | python to_inventory.py tag_Group_celerybeat_${DEPLOY_ENV} $CURRENT_BEAT_TAG)
+  if [ "$BEAT_MAINT_HOSTS" != "" ]; then
+    BEAT_MAINT_HOSTS=$(python hosts/ec2.py | python to_inventory.py tag_Group_celerybeat_${DEPLOY_ENV} $CURRENT_BEAT_TAG)
 
-  echo "Beat hosts to turn off: $BEAT_MAINT_HOSTS"
-  ansible-playbook -vvvv webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit $BEAT_MAINT_HOSTS
+    echo "Beat hosts to turn off: $BEAT_MAINT_HOSTS"
+    ansible-playbook -vvvv webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit $BEAT_MAINT_HOSTS
+  else
+    echo "No beat hosts to turn off"
+  fi
 
   stop
   saveTime $STOP 8
