@@ -121,11 +121,12 @@ rabbit_mq_sg = t.add_resource(SecurityGroup(
     GroupDescription="rabbitmq-sg-ingress",
     SecurityGroupIngress=[
         SecurityGroupRule("JenkinsAccess", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="54.173.150.226/32"),
-        SecurityGroupRule("TylerAccess", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="69.255.184.149/32"),
+        SecurityGroupRule("TylerAccess", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="73.173.214.176/32"),
         SecurityGroupRule("JoeAccess", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="65.254.97.100/32"),
         SecurityGroupRule("JoeAccess2", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="108.66.75.162/32"),
         SecurityGroupRule("JoeAccess3", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="71.86.4.190/32"),
         SecurityGroupRule("JoeAccess4", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="75.133.14.178/32"),
+        SecurityGroupRule("TylerAccessWeb", IpProtocol="tcp", FromPort="15672", ToPort="15672", CidrIp="73.173.214.176/32"),
         SecurityGroupRule("JoeAccessWeb", IpProtocol="tcp", FromPort="15672", ToPort="15672", CidrIp="65.254.97.100/32"),
         SecurityGroupRule("JoeAccess2Web", IpProtocol="tcp", FromPort="15672", ToPort="15672", CidrIp="108.66.75.162/32"),
         SecurityGroupRule("JoeAccess3Web", IpProtocol="tcp", FromPort="15672", ToPort="15672", CidrIp="71.86.4.190/32"),
