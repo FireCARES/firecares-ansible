@@ -179,7 +179,7 @@ maintOn() {
     if [ "$MAINT_HOSTS" != "" ]; then
       echo "Hosts to apply maintenance mode: $MAINT_HOSTS"
       # echo ansible-playbook -vvvv -i $MAINT_HOSTS webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE
-      ansible-playbook -vvvv -i $MAINT_HOSTS webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE
+      ansible-playbook -vvvv webservers-${DEPLOY_ENV}.yml --tags "maintenance_mode_on" -e "maintenance_mode=yes" --private-key=$PRIVATE_KEY_FILE --limit $MAINT_HOSTS
     else
       echo "No hosts need to be set to maintenance mode, skipping..."
     fi
@@ -222,11 +222,9 @@ migrateCollectStatic() {
   # )
 
   if [ "$RUN_MIGRATIONS" != "0" ]; then
-    # echo ansible-playbook -vvvv -i $PRIMARY_HOST webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic,django.generate_sitemap" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes, generate_sitemap=yes" --private-key=$PRIVATE_KEY_FILE
-    ansible-playbook -vvvv -i $PRIMARY_HOST webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic,django.generate_sitemap" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes, generate_sitemap=yes" --private-key=$PRIVATE_KEY_FILE
+    ansible-playbook -vvvv webservers-${DEPLOY_ENV}.yml --tags "django.syncdb,django.migrate,django.collectstatic,django.generate_sitemap" --extra-vars="run_django_sync_db=yes, run_django_db_migrations=yes, run_django_collectstatic=yes, generate_sitemap=yes" --private-key=$PRIVATE_KEY_FILE --limit $PRIMARY_HOST
   else
-    # echo ansible-playbook -vvvv -i $PRIMARY_HOST webservers-${DEPLOY_ENV}.yml --tags "django.collectstatic" --extra-vars="run_django_collectstatic=yes" --private-key=$PRIVATE_KEY_FILE
-    ansible-playbook -vvvv -i $PRIMARY_HOST webservers-${DEPLOY_ENV}.yml --tags "django.collectstatic" --extra-vars="run_django_collectstatic=yes" --private-key=$PRIVATE_KEY_FILE
+    ansible-playbook -vvvv webservers-${DEPLOY_ENV}.yml --tags "django.collectstatic" --extra-vars="run_django_collectstatic=yes" --private-key=$PRIVATE_KEY_FILE --limit $PRIMARY_HOST
   fi
 
   stop
