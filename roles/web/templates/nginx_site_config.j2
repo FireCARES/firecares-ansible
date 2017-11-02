@@ -89,6 +89,7 @@ server {
       expires 30d;
       add_header Pragma public;
       add_header Cache-Control "public";
+      proxy_read_timeout 300;
    }
 
     location /tmp/ {
