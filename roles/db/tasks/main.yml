@@ -11,7 +11,7 @@
   apt: name={{ item }} update_cache={{ update_apt_cache }} state=installed
   with_items:
     - postgresql-{{postgresql_version}}
-    - postgresql-contrib
+    - postgresql-contrib-{{postgresql_version}}
     - python-psycopg2
   tags: packages
 
