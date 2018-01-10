@@ -1,5 +1,5 @@
 - name: Create swap file
-  command: dd if=/dev/zero of={{ swap_file_path }} bs=1024 count={{ swap_file_size_kb }}k
+  command: dd if=/dev/zero of={{ swap_file_path }} bs=1024 count={{ swap_file_size_mb }}k
            creates="{{ swap_file_path }}"
   tags: swap.file.create
 

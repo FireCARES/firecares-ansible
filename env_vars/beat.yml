@@ -1,0 +1,6 @@
+---
+  
+create_swap_file: no
+swap_file_size_mb: 4096
+celery_queues: singlenode,weather-task
+run_beat: yes

@@ -2,4 +2,4 @@
 
 create_swap_file: no
 swap_file_path: /swapfile
-swap_file_size_kb: 512
+swap_file_size_mb: 512

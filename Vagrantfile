@@ -16,7 +16,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     default.vm.network "forwarded_port", guest: 8089, host: 8089
 
     default.vm.provider :virtualbox do |vb|
-        vb.customize ["modifyvm", :id, "--name", "FireCARES", "--memory", ENV['VM_MEMORY'] || "5000"]
+        vb.customize ["modifyvm", :id, "--name", "FireCARES", "--memory", ENV['VM_MEMORY'] || "8000"]
     end
 
     default.vm.provision "ansible" do |ansible|
