@@ -229,7 +229,8 @@ web_sg = t.add_resource(ec2.SecurityGroup(
         ec2.SecurityGroupRule("JoeAccess", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="65.254.97.100/32"),
         ec2.SecurityGroupRule("JoeAccess2", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="108.66.75.162/32"),
         ec2.SecurityGroupRule("JoeAccess3", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="71.86.4.190/32"),
-        ec2.SecurityGroupRule("JoeAccess4", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="75.133.14.178/32")
+        ec2.SecurityGroupRule("JoeAccess4", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="75.133.14.178/32"),
+        ec2.SecurityGroupRule("SontagAccess", IpProtocol="tcp", FromPort="22", ToPort="22", CidrIp="47.215.167.239/32")
         ],
     ))
 
