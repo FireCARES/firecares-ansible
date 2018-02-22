@@ -5,3 +5,14 @@
 
 - include: build_r_package.yml
   tags: r
+  
+- name: R | Cron job template
+  template: src=run-predictions.sh.j2
+            dest={{ virtualenv_path }}/src/fire-risk/r_code/run-predictions.sh
+            owner={{ gunicorn_user }}
+            mode="u+x,g+x,o+x"
+
+- cron: name="run predictions" day="*/3" user="{{gunicorn_user}}" job="{{ virtualenv_path }}/src/fire-risk/r_code/run-predictions.sh"
+  with_items:
+    - {host: '\"Host: firecares.org\"'}
+  tags: django.cron_jobs

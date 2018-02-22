@@ -49,7 +49,7 @@ commit = t.add_parameter(Parameter(
 
 beat_instance_class = t.add_parameter(Parameter(
     "BeatInstanceClass",
-    Default="t2.medium",
+    Default="t2.large",
     Description="Celery beat EC2 instance type",
     Type="String",
     ConstraintDescription="must be a valid EC2 instance type.",

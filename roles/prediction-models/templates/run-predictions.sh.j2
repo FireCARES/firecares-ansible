@@ -1,0 +1,9 @@
+#!/bin/bash
+
+source {{ virtualenv_path }}/bin/activate
+source {{ virtualenv_path }}/bin/postactivate
+cd {{ virtualenv_path }}/src/fire-risk/r_code
+Rscript run.R
+
+cd {{ virtualenv_path }}/firecares
+python manage.py import-predictions {{ virtualenv_path }}/src/fire-risk/r_code/predictions.csv
