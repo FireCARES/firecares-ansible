@@ -11,8 +11,9 @@
             dest={{ virtualenv_path }}/src/fire-risk/r_code/run-predictions.sh
             owner={{ gunicorn_user }}
             mode="u+x,g+x,o+x"
+  tags: r
 
 - cron: name="run predictions" day="*/3" user="{{gunicorn_user}}" job="{{ virtualenv_path }}/src/fire-risk/r_code/run-predictions.sh"
   with_items:
     - {host: '\"Host: firecares.org\"'}
-  tags: django.cron_jobs
+  tags: r
