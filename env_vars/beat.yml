@@ -1,6 +1,6 @@
 ---
   
-create_swap_file: no
+create_swap_file: yes
 swap_file_size_mb: 8192
 celery_queues: singlenode,weather-task
 run_beat: yes
