@@ -13,7 +13,10 @@
             mode="u+x,g+x,o+x"
   tags: r
 
-- cron: name="run predictions" day="*/3" user="{{gunicorn_user}}" job="{{ virtualenv_path }}/src/fire-risk/r_code/run-predictions.sh"
-  with_items:
-    - {host: '\"Host: firecares.org\"'}
+- cron:
+    name: "run predictions"
+    day: "*/3"
+    user: "{{gunicorn_user}}"
+    job: "{{ virtualenv_path }}/src/fire-risk/r_code/run-predictions.sh"
+    state: "{{ 'present' if deployment_env != 'vagrant' else 'absent' }}"
   tags: r
