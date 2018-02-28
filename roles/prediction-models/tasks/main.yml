@@ -15,6 +15,8 @@
 
 - cron:
     name: "run predictions"
+    minute: "0"
+    hour: "0"
     day: "*/3"
     user: "{{gunicorn_user}}"
     job: "{{ virtualenv_path }}/src/fire-risk/r_code/run-predictions.sh"
