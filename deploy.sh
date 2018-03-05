@@ -174,6 +174,13 @@ maintOn() {
   # Make sure that the new servers aren't included in the set to show the maintenance mode on
   MAINT_HOSTS=$(python hosts/ec2.py | python to_inventory.py tag_Group_web_server_${DEPLOY_ENV} $CURRENT_TAG)
   PRIMARY_HOST=$(python hosts/ec2.py | python to_inventory.py $CURRENT_TAG | sed -e "s/,.*//g"),
+  
+  if [ "$KEEP" == "1" ]; then
+    echo "Only 1 stack, no need for maintenance mode on old stack..."
+    stop
+    saveTime $STOP 5
+    return
+  fi
 
   if [ "$RUN_MIGRATIONS" != "0" ]; then
     if [ "$MAINT_HOSTS" != "" ]; then
@@ -290,6 +297,13 @@ turnOffOld() {
 
   # Make sure that the new servers aren't included in the set to show the maintenance mode on
   MAINT_HOSTS=$(python hosts/ec2.py | python to_inventory.py tag_Group_web_server_${DEPLOY_ENV} $CURRENT_TAG)
+  
+  if [ "$KEEP" == "1" ]; then
+    echo "Only 1 stack, no need to turn off maintenance mode...old stack will be destroyed"
+    stop
+    saveTime $STOP 8
+    return
+  fi
 
   if [ "$MAIN_HOSTS" != "" ]; then
     # Wait for a little bit before spinning down the old webservers/celery servers
