@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "Running predictions...started $(date)"
 source {{ virtualenv_path }}/bin/activate
 source {{ virtualenv_path }}/bin/postactivate
 cd {{ virtualenv_path }}/src/fire-risk/r_code
@@ -9,3 +10,4 @@ cd {{ virtualenv_path }}/firecares
 python manage.py import-predictions {{ virtualenv_path }}/src/fire-risk/r_code/predictions.csv
 aws s3 cp {{ virtualenv_path }}/src/fire-risk/r_code/predictions.csv s3://firecares-backups/predictions/{{ deployment_env }}/predictions-$(date '+%Y-%m-%d-%H:%M:%S').csv
 rm {{ virtualenv_path }}/src/fire-risk/r_code/predictions.csv
+echo "Predictions completed...$(date)"
