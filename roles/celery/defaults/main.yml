@@ -1,4 +1,4 @@
 ---
 
-celery_queues: default,cache,update,email,slack,quality-control,cleanup,servicearea
+celery_queues: default,cache,update,email,slack,quality-control,cleanup
 run_beat: false

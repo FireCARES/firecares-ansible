@@ -52,7 +52,7 @@ rabbitmq_application_password: password
 # Celery settings.
 celery_num_workers: 2
 flower_admin_password: password
-celery_queues: default,cache,update,email,slack,quality-control,cleanup,singlenode,weather-task,servicearea
+celery_queues: default,cache,update,email,slack,quality-control,cleanup,singlenode,weather-task,dataanalysis
 
 
 # Application settings.

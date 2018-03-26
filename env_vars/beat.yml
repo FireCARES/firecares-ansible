@@ -2,5 +2,5 @@
   
 create_swap_file: yes
 swap_file_size_mb: 8192
-celery_queues: singlenode,weather-task
+celery_queues: singlenode,weather-task,dataanalysis
 run_beat: yes
