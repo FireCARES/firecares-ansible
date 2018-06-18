@@ -1,14 +1,20 @@
 #!/bin/bash
 
+err () {
+  curl -X POST --data-urlencode "payload={\"channel\": \"#deployments\", \"username\": \"webhookbot\", \"text\": \"Error running predictions. :( \", \"icon_emoji\": \":ghost:\"}" https://hooks.slack.com/services/T2RDGCW3A/BBACY8BP1/{{ slack_webhook_key }}
+  exit 1
+}
+
 echo "Running predictions...started $(date)"
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 source {{ virtualenv_path }}/bin/activate
 source {{ virtualenv_path }}/bin/postactivate
 cd {{ virtualenv_path }}/src/fire-risk/r_code
-Rscript run.R
+Rscript run.R || err
 
 cd {{ virtualenv_path }}/firecares
-python manage.py import-predictions {{ virtualenv_path }}/src/fire-risk/r_code/predictions.csv
-aws s3 cp {{ virtualenv_path }}/src/fire-risk/r_code/predictions.csv s3://firecares-backups/predictions/{{ deployment_env }}/predictions-$(date '+%Y-%m-%d-%H:%M:%S').csv
+python manage.py import-predictions {{ virtualenv_path }}/src/fire-risk/r_code/predictions.csv || err
+aws s3 cp {{ virtualenv_path }}/src/fire-risk/r_code/predictions.csv s3://firecares-backups/predictions/{{ deployment_env }}/predictions-$(date '+%Y-%m-%d-%H:%M:%S').csv || err
 rm {{ virtualenv_path }}/src/fire-risk/r_code/predictions.csv
 echo "Predictions completed...$(date)"
+curl -X POST --data-urlencode "payload={\"channel\": \"#deployments\", \"username\": \"webhookbot\", \"text\": \"Predictions/risk scores updated on FireCARES\", \"icon_emoji\": \":ghost:\"}" https://hooks.slack.com/services/T2RDGCW3A/BBACY8BP1/{{ slack_webhook_key }}
