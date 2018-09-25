@@ -14,3 +14,4 @@ node_modules/
 /tmp
 .cache
 __pycache__
+.python-version

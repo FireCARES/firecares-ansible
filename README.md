@@ -27,7 +27,7 @@ A quick way to get started is with Vagrant and VirtualBox.
 - [Vagrant](http://www.vagrantup.com/downloads.html)
 - [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 
-*NOTE: in order to retrieve the latest set of FireCARES database fixtures, be sure to add your AWS information into the `aws_access_key_id` and `aws_secret_access_key` settings within `env_vars/base.yml` before provisioning your VM*
+*NOTE: in order to retrieve the latest set of FireCARES database fixtures, be sure to add AWS information into the `aws_access_key_id` and `aws_secret_access_key` settings within `env_vars/base.yml` before provisioning your VM. The `secret_vault.yml` contains the key/secret to use to pull down fixtures.*
 
 ```
 git clone https://github.com/FireCARES/firecares-ansible.git
