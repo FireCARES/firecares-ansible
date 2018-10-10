@@ -205,7 +205,7 @@ load_balancer = t.add_resource(elb.LoadBalancer(
         "LoadBalancerPort": "443",
         "InstancePort": "80",
         "Protocol": "HTTPS",
-        "SSLCertificateId": "arn:aws:iam::164077527722:server-certificate/firecares",
+        "SSLCertificateId": "arn:aws:acm:us-east-1:164077527722:certificate/a8085d69-3f7b-442e-baa6-70f3bd9b4981",
         "PolicyNames": [
             "AppCookieBasedPolicy"
         ]
