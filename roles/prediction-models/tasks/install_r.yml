@@ -25,6 +25,10 @@
       - ranger
       - RPostgreSQL
       - lme4
+      - devtools
+      - boot
+      - magrittr
+      - roxygen2
 
 - name: Install Census API key
   command: >
