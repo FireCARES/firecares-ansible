@@ -43,6 +43,9 @@
     - libxslt-dev
     - libffi-dev
     - postgis
+    - pyopenssl
+    - ndg-httpsclient
+    - pyasn1
 
   tags: packages
 
@@ -63,6 +66,10 @@
 
 - name: Install virtualenv
   pip: name=virtualenvwrapper
+  tags: packages
+
+- name: Install requests
+  pip: name=requests[security]
   tags: packages
 
 - name: copy esri extras
