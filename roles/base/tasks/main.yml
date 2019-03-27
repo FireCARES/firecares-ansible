@@ -43,9 +43,6 @@
     - libxslt-dev
     - libffi-dev
     - postgis
-    - ndg-httpsclient
-    - pyasn1
-
   tags: packages
 
 - name: activate unattended-upgrades
@@ -67,9 +64,13 @@
   pip: name=virtualenvwrapper
   tags: packages
 
-- name: Install requests
-  pip: name=requests[security]
+- name: Install python security packages
+  pip: name={{item}}
   tags: packages
+  with_items:
+    - ndg-httpsclient
+    - pyOpenSSL
+    - pyasn1
 
 - name: copy esri extras
   copy: src=files/esri_extra.wkt dest=/usr/share/gdal/1.10 mode=0644
