@@ -17,3 +17,9 @@
   tags:
     - celery
     - deploy
+
+- name: Install python packages for celery
+  pip: name={{item}}
+  tags: packages
+  with_items:
+    - sh
