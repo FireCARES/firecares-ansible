@@ -56,11 +56,6 @@
     - 'APT::Periodic::Update-Package-Lists "1";'
     - 'APT::Periodic::Unattended-Upgrade "1";'
 
-- name: Install older version of setuptools
-  pip: 
-    name: setuptools==34.2.0
-  tags: packages
-
 - name: Install virtualenv
   pip: name=virtualenv
   tags: packages
