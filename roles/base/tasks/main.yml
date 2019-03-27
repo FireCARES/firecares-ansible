@@ -43,7 +43,6 @@
     - libxslt-dev
     - libffi-dev
     - postgis
-    - pyopenssl
     - ndg-httpsclient
     - pyasn1
 
