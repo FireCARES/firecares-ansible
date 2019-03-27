@@ -68,6 +68,7 @@
   pip: name={{item}}
   tags: packages
   with_items:
+    - urllib3
     - ndg-httpsclient
     - pyOpenSSL
     - pyasn1
