@@ -244,6 +244,11 @@ def deploy(ami, beatami, env, commithash, dbpass, dbuser, s3cors, keep):
 
     db_stack = conn.describe_stacks(stack_name_or_id=db_stack)[0]
 
+    # minor debugging
+    print "CURRENT STACK STATUS"
+    print db_stack.stack_status
+    print db_stack
+
     if db_stack.stack_status != 'UPDATE_COMPLETE':
         click.secho('DB stack update failed...bailing')
         click.get_current_context().exit(code=2)
