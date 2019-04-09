@@ -1,4 +1,12 @@
 ---
+- name: Install base packages
+  apt: name={{ item }} update_cache={{ update_apt_cache }} force=yes state=installed
+  with_items:
+    - libssh2-1-dev
+    - libgit2-dev
+    - libgit2-0
+    - libgit2-dbg
+  tags: packages
 
 - name: Add CRAN apt repo
   apt_repository:
