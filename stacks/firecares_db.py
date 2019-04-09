@@ -218,7 +218,8 @@ db_sg = t.add_resource(SecurityGroup(
         SecurityGroupRule("JoeAccess4", IpProtocol="tcp", FromPort="5432", ToPort="5432", CidrIp="54.87.125.141/32"),
         SecurityGroupRule("JoeAccess4", IpProtocol="tcp", FromPort="5432", ToPort="5432", CidrIp="54.167.99.192/32"),
         SecurityGroupRule("JoeAccess4", IpProtocol="tcp", FromPort="5432", ToPort="5432", CidrIp="52.205.224.226/32"),
-        SecurityGroupRule("JoeAccess4", IpProtocol="tcp", FromPort="5432", ToPort="5432", CidrIp="52.206.122.170/32")
+        SecurityGroupRule("JoeAccess4", IpProtocol="tcp", FromPort="5432", ToPort="5432", CidrIp="52.206.122.170/32"),
+        SecurityGroupRule("JoeAccess4", IpProtocol="tcp", FromPort="5432", ToPort="5432", CidrIp="52.202.117.147/32")
     ]
 ))
 
