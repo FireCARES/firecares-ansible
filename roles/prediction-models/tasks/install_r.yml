@@ -47,6 +47,7 @@
       - ranger
       - RPostgreSQL
       - lme4
+      - usethis
       - devtools
       - boot
       - magrittr
