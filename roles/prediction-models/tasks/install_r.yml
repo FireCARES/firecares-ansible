@@ -33,6 +33,7 @@
   with_items:
       - acs
       - glmnet
+      - glue
       - git2r
       - ranger
       - RPostgreSQL
