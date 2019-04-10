@@ -24,6 +24,16 @@
 - name: Install R-base
   apt: name="r-base" update_cache=yes
 
+
+- name: Install glue specific version
+  command: >
+    Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item }}' %in% installed.packages()[,'Package'])) { install.packages('{{ item }}'); print('Added'); } else { print('Already installed'); }"
+  register: r_result
+  failed_when: "r_result.rc != 0 or 'had non-zero exit status' in r_result.stderr"
+  changed_when: "'Added' in r_result.stdout"
+  with_items:
+      - glue
+
 - name: Install fire-risk dependencies
   command: >
     Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item }}' %in% installed.packages()[,'Package'])) { install.packages(pkgs='{{ item }}', repos=c('https://cloud.r-project.org/')); print('Added'); } else { print('Already installed'); }"
@@ -33,7 +43,6 @@
   with_items:
       - acs
       - glmnet
-      - glue
       - git2r
       - ranger
       - RPostgreSQL
