@@ -33,7 +33,6 @@
   changed_when: "'Added' in r_result.stdout"
   with_items:
       - glue
-      - usethis
 
 - name: Install fire-risk dependencies
   command: >
