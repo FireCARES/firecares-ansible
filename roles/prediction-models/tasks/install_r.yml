@@ -43,6 +43,7 @@
       - { name: 'lme4', version: '1.1-21' }
       - { name: 'magrittr', version: '1.5' }
       - { name: 'roxygen2', version: '6.1.1' }
+  become: yes 
 
 - name: Install Census API key
   command: >
