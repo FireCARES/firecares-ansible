@@ -37,7 +37,7 @@
       - { name: 'devtools', version: '2.0.1' }
       - { name: 'DBI', version: '1.0.0' }
       - { name: 'glmnet', version: '2.0-16' }
-      - { name: 'git2r', version: '	0.25.2' }
+      - { name: 'git2r', version: '0.25.2' }
       - { name: 'ranger', version: '0.11.2' }
       - { name: 'RPostgreSQL', version: '0.6-2' }
       - { name: 'lme4', version: '1.1-21' }
