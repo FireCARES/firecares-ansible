@@ -25,34 +25,24 @@
 - name: Install R-base
   apt: name="r-base" update_cache=yes
 
-
-- name: Install glue specific version
-  command: >
-    Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item }}' %in% installed.packages()[,'Package'])) { install.packages('{{ item }}', dependencies=TRUE, repos='http://cran.us.r-project.org'); print('Added'); } else { print('Already installed'); }"
-  register: r_result
-  failed_when: "r_result.rc != 0 or 'had non-zero exit status' in r_result.stderr"
-  changed_when: "'Added' in r_result.stdout"
-  with_items:
-      - glue
-      - usethis
-      - devtools
-
 - name: Install fire-risk dependencies
   command: >
-    Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item }}' %in% installed.packages()[,'Package'])) { install.packages(pkgs='{{ item }}', repos=c('https://cloud.r-project.org/')); print('Added'); } else { print('Already installed'); }"
+    Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item.name }}' %in% installed.packages()[,'Package'])) { install.packages(pkgs='https://cran.r-project.org/package={{ item.name }}&version={{ item.version }}', repos=NULL, dependencies=TRUE); print('Added'); } else { print('Already installed'); }"
   register: r_result
   failed_when: "r_result.rc != 0 or 'had non-zero exit status' in r_result.stderr"
   changed_when: "'Added' in r_result.stdout"
   with_items:
-      - acs
-      - glmnet
-      - git2r
-      - ranger
-      - RPostgreSQL
-      - lme4
-      - boot
-      - magrittr
-      - roxygen2
+      - { name: 'acs', version: '2.1.4' }
+      - { name: 'boot', version: '1.3-20' }
+      - { name: 'devtools', version: '2.0.1' }
+      - { name: 'DBI', version: '1.0.0' }
+      - { name: 'glmnet', version: '2.0-16' }
+      - { name: 'git2r', version: '	0.25.2' }
+      - { name: 'ranger', version: '0.11.2' }
+      - { name: 'RPostgreSQL', version: '0.6-2' }
+      - { name: 'lme4', version: '1.1-21' }
+      - { name: 'magrittr', version: '1.5' }
+      - { name: 'roxygen2', version: '6.1.1' }
 
 - name: Install Census API key
   command: >
