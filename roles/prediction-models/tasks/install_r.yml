@@ -27,7 +27,7 @@
 
 - name: Install fire-risk dependencies
   command: >
-    Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item.name }}' %in% installed.packages()[,'Package'])) { install.packages(pkgs='https://cran.r-project.org/package={{ item.name }}&version={{ item.version }}', repos=NULL, dependencies=TRUE); print('Added'); } else { print('Already installed'); }"
+    Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item.name }}' %in% installed.packages()[,'Package'])) { install.packages(pkgs='https://cran.r-project.org/package={{ item.name }}&version={{ item.version }}', repos=NULL); print('Added'); } else { print('Already installed'); }"
   register: r_result
   failed_when: "r_result.rc != 0 or 'had non-zero exit status' in r_result.stderr"
   changed_when: "'Added' in r_result.stdout"
