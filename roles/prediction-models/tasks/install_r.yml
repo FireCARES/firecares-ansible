@@ -10,6 +10,7 @@
     - libcurl4-openssl-dev
     - libssl-dev
     - libmagick++-dev
+    - build-essential
   tags: packages
 
 - name: Add CRAN apt repo
