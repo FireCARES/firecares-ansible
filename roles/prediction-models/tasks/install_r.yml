@@ -44,7 +44,7 @@
       - { name: 'boot', version: '1.3-20' }
       - { name: 'git2r', version: '0.25.2' }
       - { name: 'usethis', version: '1.5.0' }
-      - { name: 'devtools', version: '2.0.1' }
+      #- { name: 'devtools', version: '2.0.1' }
       - { name: 'DBI', version: '1.0.0' }
       - { name: 'glmnet', version: '2.0-16' }
       - { name: 'ranger', version: '0.11.2' }
