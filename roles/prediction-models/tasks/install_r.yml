@@ -34,7 +34,7 @@
 
 - name: Install fire-risk dependencies
   command: >
-    Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item.name }}' %in% installed.packages()[,'Package'])) { install.packages('{{ item.name }}', repos='https://cloud.r-project.org', dependencies=c('Depends','Imports')); print('Added'); } else { print('Already installed'); }"
+    Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item.name }}' %in% installed.packages()[,'Package'])) { install.packages('{{ item.name }}', repos='https://cloud.r-project.org', dependencies=c('Depends','Imports'), verbose=TRUE); print('Added'); } else { print('Already installed'); }"
   register: r_result
   failed_when: "r_result.rc != 0 or 'had non-zero exit status' in r_result.stderr"
   changed_when: "'Added' in r_result.stdout"
@@ -44,7 +44,7 @@
       - { name: 'boot', version: '1.3-20' }
       - { name: 'git2r', version: '0.25.2' }
       - { name: 'usethis', version: '1.5.0' }
-      #- { name: 'devtools', version: '2.0.1' }
+      - { name: 'devtools', version: '2.0.1' }
       - { name: 'DBI', version: '1.0.0' }
       - { name: 'glmnet', version: '2.0-16' }
       - { name: 'ranger', version: '0.11.2' }
