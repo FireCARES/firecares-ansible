@@ -6,7 +6,6 @@
     - libgit2-dev
     - libgit2-0
     - libgit2-dbg
-    - libcurl4-gnutls-dev
     - libxml2-dev
     - libcurl4-openssl-dev
     - libssl-dev
