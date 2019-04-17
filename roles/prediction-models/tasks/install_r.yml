@@ -28,7 +28,7 @@
 
 - name: List R deps
   command: >
-    ip <- as.data.frame(installed.packages()[,c(1,3:4)]); rownames(ip) <- NULL; print(ip, row.names=FALSE)
+    Rscript --slave --no-save --no-restore-history -e "ip <- as.data.frame(installed.packages()[,c(1,3:4)]); rownames(ip) <- NULL; print(ip, row.names=FALSE)"
   register: r_result
   become: yes
 
