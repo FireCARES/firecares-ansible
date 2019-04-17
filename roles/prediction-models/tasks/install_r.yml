@@ -54,6 +54,12 @@
       - { name: 'roxygen2', version: '6.1.1' }
   become: yes
 
+- name: List R deps Post R installation
+  command: >
+    Rscript --slave --no-save --no-restore-history -e "ip <- as.data.frame(installed.packages()[,c(1,3:4)]); rownames(ip) <- NULL; print(ip, row.names=FALSE)"
+  register: r_result
+  become: yes
+
 - name: Install Census API key
   command: >
     Rscript --slave --no-save --no-restore-history -e "library(acs); api.key.install('{{ census_api_key }}')"
