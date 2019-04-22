@@ -36,7 +36,7 @@
   register: r_result
   become: yes
 
-- name: Install fire-risk dependencies
+- name: Install devtools
   command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "install.packages('devtools')"
   become: yes
 
