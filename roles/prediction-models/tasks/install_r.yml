@@ -11,6 +11,7 @@
     - libssl-dev
     - libmagick++-dev
     - libpq-dev
+    - libxslt-dev
     - zlib1g-dev
     - r-cran-lme4
     - build-essential
