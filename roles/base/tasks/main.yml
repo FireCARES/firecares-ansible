@@ -60,8 +60,16 @@
     - 'APT::Periodic::Update-Package-Lists "1";'
     - 'APT::Periodic::Unattended-Upgrade "1";'
 
-- name: Install requests security
-  pip: name=requests[security]
+- name: Install requests pyOpenSSL
+  pip: name=pyOpenSSL
+  tags: packages
+
+- name: Install requests ndg httpsclient
+  pip: name=ndg-httpsclient
+  tags: packages
+
+- name: Install requests pyasn1
+  pip: name=pyasn1
   tags: packages
 
 - name: Install virtualenv
