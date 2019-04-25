@@ -37,10 +37,6 @@
   register: r_result
   become: yes
 
-- name: Install tidyverse
-  command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "install.packages('tidyverse')"
-  become: yes
-
 - name: Install fire-risk dependencies
   command: >
     Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item.name }}' %in% installed.packages()[,'Package'])) { install.packages('{{ item.name }}', repos='https://cloud.r-project.org', dependencies=c('Depends','Imports'), verbose=TRUE); print('Added'); } else { print('Already installed'); }"
@@ -48,6 +44,7 @@
   failed_when: "r_result.rc != 0 or 'had non-zero exit status' in r_result.stderr"
   changed_when: "'Added' in r_result.stdout"
   with_items:
+      - { name: 'tidyverse', version: '1.2.1' }
       - { name: 'acs', version: '2.1.4' }
       - { name: 'glue', version: '1.3.1' }
       - { name: 'boot', version: '1.3-20' }
