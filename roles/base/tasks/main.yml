@@ -60,6 +60,10 @@
     - 'APT::Periodic::Update-Package-Lists "1";'
     - 'APT::Periodic::Unattended-Upgrade "1";'
 
+- name: Install requests security
+  pip: name=requests[security]
+  tags: packages
+
 - name: Install virtualenv
   pip: name=virtualenv
   tags: packages
