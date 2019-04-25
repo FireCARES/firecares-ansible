@@ -13,6 +13,7 @@
     - libpq-dev
     - libxslt-dev
     - zlib1g-dev
+    - r-base-dev
     - r-cran-lme4
     - build-essential
   tags: packages
@@ -36,9 +37,9 @@
   register: r_result
   become: yes
 
-#- name: Install devtools
-#  command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "install.packages('devtools')"
-#  become: yes
+- name: Install tidyverse
+  command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "install.packages('tidyverse')"
+  become: yes
 
 - name: Install fire-risk dependencies
   command: >
