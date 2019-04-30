@@ -73,11 +73,7 @@
   tags: packages
 
 - name: Install python security packages
-  pip: name=six state=absent
-  tags: packages
-
-- name: Install python security packages
-  pip: name={{item}}
+  pip: name={{item}} extra_args="--ignore-installed"
   tags: packages
   with_items:
     - pyOpenSSL
