@@ -73,6 +73,10 @@
   tags: packages
 
 - name: Install python security packages
+  pip: name=six state=absent
+  tags: packages
+
+- name: Install python security packages
   pip: name={{item}}
   tags: packages
   with_items:
