@@ -59,7 +59,7 @@
       - { name: 'lme4', version: '1.1-21' }
       - { name: 'magrittr', version: '1.5' }
       - { name: 'roxygen2', version: '6.1.1' }
-      - { name: 'httr', version: '6.1.1' }
+      - { name: 'httr', version: '1.4.0' }
   become: yes
 
 - name: List R deps Post R installation
