@@ -84,9 +84,9 @@
   pip: name={{item}}
   tags: packages
   with_items:
+    - pyOpenSSL
     - urllib3
     - ndg-httpsclient
-    - pyOpenSSL
     - pyasn1
     - sh
 
