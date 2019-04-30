@@ -23,3 +23,5 @@
   tags: packages
   with_items:
     - sh
+    - PyOpenSSL
+    - cryptography
