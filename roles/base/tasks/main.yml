@@ -72,14 +72,6 @@
   pip: name=pyasn1
   tags: packages
 
-- name: Install virtualenv
-  pip: name=virtualenv
-  tags: packages
-
-- name: Install virtualenv
-  pip: name=virtualenvwrapper
-  tags: packages
-
 - name: Install python security packages
   pip: name={{item}}
   tags: packages
@@ -89,6 +81,14 @@
     - ndg-httpsclient
     - pyasn1
     - sh
+
+- name: Install virtualenv
+  pip: name=virtualenv
+  tags: packages
+
+- name: Install virtualenv
+  pip: name=virtualenvwrapper
+  tags: packages
 
 - name: copy esri extras
   copy: src=files/esri_extra.wkt dest=/usr/share/gdal/1.10 mode=0644
