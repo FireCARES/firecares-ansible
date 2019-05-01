@@ -71,6 +71,6 @@
 
 - name: Install Census API key
   command: >
-    Rscript --slave --no-save --no-restore-history -e "install.packages('acs', dependencies=c('Depends','Imports'), verbose=TRUE); library(acs); api.key.install('{{ census_api_key }}')"
+    Rscript --slave --no-save --no-restore-history -e "install.packages('acs', repos='http://cran.us.r-project.org', dependencies=c('Depends','Imports'), verbose=TRUE); library(acs); api.key.install('{{ census_api_key }}')"
   when: census_api_key is defined
 
