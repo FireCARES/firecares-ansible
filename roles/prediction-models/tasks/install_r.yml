@@ -61,6 +61,7 @@
       - { name: 'roxygen2', version: '6.1.1' }
       - { name: 'plyr', version: '1.8.4' }
       - { name: 'httr', version: '1.4.0' }
+      - { name: 'acs', version: '1.4.0' }
   become: yes
 
 - name: List R deps Post R installation
@@ -71,6 +72,6 @@
 
 - name: Install Census API key
   command: >
-    Rscript --slave --no-save --no-restore-history -e "install.packages('acs', repos='http://cran.us.r-project.org', dependencies=TRUE, verbose=TRUE); library(acs); api.key.install('{{ census_api_key }}')"
+    Rscript --slave --no-save --no-restore-history -e "library(acs); api.key.install('{{ census_api_key }}')"
   when: census_api_key is defined
 
