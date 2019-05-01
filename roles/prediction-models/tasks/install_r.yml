@@ -64,6 +64,14 @@
       - { name: 'acs', version: '1.4.0' }
   become: yes
 
+- name: Get Paths
+  command: >
+    Rscript --slave --no-save --no-restore-history -e "print(.libPaths())"
+  register: r_result
+
+- name: Output paths
+  debug: var=r_result verbosity=2
+
 - name: Install Census API key
   command: >
     Rscript --slave --no-save --no-restore-history -e "library.path <- .libPaths(); library(acs, lib.loc = library.path); api.key.install('{{ census_api_key }}')"
