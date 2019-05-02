@@ -22,7 +22,7 @@
     - git
     - libpq-dev
     - python-dev
-    - python3-pip
+    - python-pip
     - python-pycurl
     - python-psycopg2
     - supervisor
