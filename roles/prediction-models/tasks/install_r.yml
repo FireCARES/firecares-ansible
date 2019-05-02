@@ -21,7 +21,7 @@
 
 - name: Add CRAN apt repo
   apt_repository:
-    repo: deb https://cran.rstudio.com/bin/linux/ubuntu precise/
+    repo: deb https://cran.rstudio.com/bin/linux/ubuntu xenial/
     state: present
 
 - name: Add CRAN key
