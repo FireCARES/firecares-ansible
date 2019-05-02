@@ -67,6 +67,15 @@
 - name: Output paths
   debug: var=r_result verbosity=2
 
+- name: List R deps
+  command: >
+    ls -l /usr/local/lib/R/site-library/; ls -l /usr/lib/R/site-library/; ls -l /usr/lib/R/library/
+  register: r_result
+  become: yes
+
+- name: Output paths
+  debug: var=r_result verbosity=2
+
 - name: Get Paths
   command: >
     Rscript --slave --no-save --no-restore-history -e "print(.libPaths())"
