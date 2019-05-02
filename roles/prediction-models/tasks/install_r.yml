@@ -68,8 +68,12 @@
   debug: var=r_result verbosity=2
 
 - name: List R deps
-  command: >
-    ls -l /usr/local/lib/R/site-library/; ls -l /usr/lib/R/site-library/; ls -l /usr/lib/R/library/
+  shell: |
+    ls -l /usr/local/lib/R/site-library/
+    ls -l /usr/lib/R/site-library/
+    ls -l /usr/lib/R/library/
+  args:
+    executable: /bin/bash
   register: r_result
   become: yes
 
