@@ -88,8 +88,8 @@
 - name: Output paths
   debug: var=r_result verbosity=2
 
-#- name: Install Census API key
-#  command: >
-#    Rscript --slave --no-save --no-restore-history -e "library.path <- .libPaths(); library(acs, lib.loc = library.path); api.key.install('{{ census_api_key }}')"
-#  when: census_api_key is defined
+- name: Install Census API key
+  command: >
+    Rscript --slave --no-save --no-restore-history -e "library.path <- .libPaths(); library(acs, lib.loc = library.path); api.key.install('{{ census_api_key }}')"
+  when: census_api_key is defined
 
