@@ -13,15 +13,13 @@
     - libpq-dev
     - libxslt-dev
     - zlib1g-dev
-    - r-base
-    - r-base-dev
     - r-cran-lme4
     - build-essential
   tags: packages
 
 - name: Add CRAN apt repo
   apt_repository:
-    repo: deb https://cran.rstudio.com/bin/linux/ubuntu trusty/
+    repo: deb https://cran.rstudio.com/bin/linux/ubuntu trusty-cran35/
     state: present
 
 - name: Add CRAN key
@@ -31,6 +29,9 @@
 
 - name: Install R-base
   apt: name="r-base" update_cache=yes
+
+- name: Install R-base
+  apt: name="r-base-dev" update_cache=yes
 
 - name: Install fire-risk dependencies
   command: >
