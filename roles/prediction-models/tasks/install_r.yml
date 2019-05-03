@@ -14,7 +14,6 @@
     - libxslt-dev
     - zlib1g-dev
     - r-cran-lme4
-    - r-cran-glmnet
     - build-essential
   tags: packages
 
