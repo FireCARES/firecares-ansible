@@ -9,7 +9,7 @@
     "access_key": "{{user `aws_access_key`}}",
     "secret_key": "{{user `aws_secret_key`}}",
     "region": "us-east-1",
-    "source_ami": "ami-05a36d3b9aa4a17ac",
+    "source_ami": "ami-0565af6e282977273",
     "instance_type": "t2.small",
     "ssh_username": "ubuntu",
     "ssh_timeout": "10m",
@@ -29,9 +29,7 @@
       "inline": [
         "apt-add-repository ppa:rquillo/ansible",
         "/usr/bin/apt-get update",
-        "/usr/bin/apt-get -y install openssl libssl-dev libssl-doc build-essential libffi-dev python-dev python-pip",
-        "pip install --upgrade setuptools pip",
-        "pip install ansible==1.9.4"
+        "/usr/bin/apt-get -y install openssl libssl-dev libssl-doc build-essential libffi-dev python-dev python-pip ansible"
       ]
     },
     {
