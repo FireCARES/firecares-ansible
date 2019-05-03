@@ -13,7 +13,6 @@
     - libpq-dev
     - libxslt-dev
     - zlib1g-dev
-    - r-cran-lme4
     - build-essential
   tags: packages
 
@@ -29,9 +28,6 @@
 
 - name: Install R-base
   apt: name="r-base" update_cache=yes
-
-- name: Install R-base
-  apt: name="r-base-dev" update_cache=yes
 
 - name: Install fire-risk dependencies
   command: >
