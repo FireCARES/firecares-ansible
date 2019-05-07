@@ -49,7 +49,7 @@
     - libssh2-1-dev
     - libgit2-dev
     - libgit2-24
-    #- libgit2-dbg
+    - libgit2-24-dbgsym
     - postgis
   tags: packages
 
