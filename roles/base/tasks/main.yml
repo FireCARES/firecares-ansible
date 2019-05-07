@@ -14,7 +14,11 @@
   tags: packages
 
 - name: Install base packages
-  apt: name={{ item }} update_cache={{ update_apt_cache }} force=yes state=installed
+  apt:
+    pkg: "{{ item }}"
+    update_cache: yes
+    force: yes
+    state: present
   with_items:
     - build-essential
     - ntp
