@@ -74,17 +74,17 @@
   pip: name=pyasn1
   tags: packages
 
-- name: Install python security packages
-  pip:
-    name: "{{ item }}"
-    extra_args: "--ignore-installed"
-  tags: packages
-  with_items:
-    - pyOpenSSL
-    - urllib3
-    - ndg-httpsclient
-    - pyasn1
-    - sh
+#- name: Install python security packages
+  #pip:
+    #name: "{{ item }}"
+    #extra_args: "--ignore-installed"
+  #tags: packages
+  #with_items:
+    #- pyOpenSSL
+    #- urllib3
+    #- ndg-httpsclient
+    #- pyasn1
+    #- sh
 
 - name: Install virtualenv
   pip: name=virtualenv
