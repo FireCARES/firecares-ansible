@@ -26,7 +26,6 @@
     - git
     - libpq-dev
     - python-dev
-    - python-pip
     - python-pycurl
     - python-psycopg2
     - supervisor
@@ -76,7 +75,9 @@
   tags: packages
 
 - name: Install python security packages
-  pip: name={{item}} extra_args="--ignore-installed"
+  pip:
+    name: "{{ item }}"
+    extra_args: "--ignore-installed"
   tags: packages
   with_items:
     - pyOpenSSL

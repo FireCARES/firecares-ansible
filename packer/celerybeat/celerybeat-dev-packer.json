@@ -30,7 +30,9 @@
         "apt-add-repository ppa:ansible/ansible",
         "/usr/bin/apt-get update",
         "/usr/bin/apt-get upgrade",
-        "/usr/bin/apt-get -y install openssl libssl-dev libssl-doc build-essential libffi-dev python-dev python-pip ansible"
+        "/usr/bin/apt-get -y install openssl libssl-dev libssl-doc build-essential libffi-dev python-dev ansible",
+        "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py",
+        "python get-pip.py"
       ]
     },
     {
