@@ -48,7 +48,7 @@
     - libffi-dev
     - libssh2-1-dev
     - libgit2-dev
-    - libgit2
+    - libgit2-24
     - libgit2-dbg
     - postgis
   tags: packages
