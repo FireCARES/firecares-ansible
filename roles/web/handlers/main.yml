@@ -4,10 +4,18 @@
   supervisorctl: name={{ application_name }} state=restarted
 
 - name: restart nginx
-  service: name=nginx state=restarted enabled=yes
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: nginx
+    enabled: yes
 
 - name: reload nginx
-  service: name=nginx state=reloaded
+  systemd:
+    state: reloaded
+    daemon_reload: yes
+    name: nginx
+    enabled: yes
 
 - name: update full text column
   command: sudo -u postgres psql -d {{ db_name }} -c "UPDATE firestation_firedepartment SET fts_document=department_fts_document(id);"
