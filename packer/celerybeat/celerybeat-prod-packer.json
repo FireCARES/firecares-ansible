@@ -10,7 +10,7 @@
     "secret_key": "{{user `aws_secret_key`}}",
     "region": "us-east-1",
     "source_ami": "ami-9fac41e2",
-    "instance_type": "t2.small",
+    "instance_type": "t2.medium",
     "ssh_username": "ubuntu",
     "ssh_timeout": "10m",
     "ami_name": "celerybeat-prod-{{user `commit`}}",
