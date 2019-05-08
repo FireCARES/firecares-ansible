@@ -25,5 +25,3 @@
     - memcached
     - web
     - celery
-    - filebeat
-    - metricbeat
