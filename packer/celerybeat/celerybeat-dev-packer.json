@@ -27,6 +27,7 @@
       "type": "shell",
       "execute_command": "echo 'vagrant' | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
       "inline": [
+        "sleep 30",
         "apt-add-repository ppa:ansible/ansible",
         "/usr/bin/apt-get update",
         "/usr/bin/apt-get upgrade",
