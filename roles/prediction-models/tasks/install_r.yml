@@ -28,6 +28,9 @@
 - name: Install R-base
   apt: name="r-base" update_cache=yes
 
+- name: Install RScript
+  apt: name="r-cran-littler" update_cache=yes
+
 - name: Install fire-risk dependencies
   command: >
     Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item.name }}' %in% installed.packages()[,'Package'])) { install.packages('{{ item.name }}', repos='https://cloud.r-project.org', dependencies=c('Depends','Imports'), verbose=TRUE); print('Added'); } else { print('Already installed'); }"
