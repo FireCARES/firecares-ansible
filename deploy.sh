@@ -35,7 +35,6 @@ echo -e "URL: ${BOLD}${URL}${BOLDOFF}"
 mkdir -p $TMP
 
 stepavg() {
-  sudo apt-get update -y
   sudo apt-get install -y bc
 
   if [ -f "$TMP/$1.txt" ]; then
