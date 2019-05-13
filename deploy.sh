@@ -35,6 +35,9 @@ echo -e "URL: ${BOLD}${URL}${BOLDOFF}"
 mkdir -p $TMP
 
 stepavg() {
+  sudo apt-get update -y
+  sudo apt-get install -y bc
+
   if [ -f "$TMP/$1.txt" ]; then
     TOT=$(awk '{ sum += $1 } END { print sum }' $TMP/$1.txt)
     LINES=$(wc -l < $TMP/$1.txt | tr -d ' ')
