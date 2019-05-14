@@ -43,7 +43,7 @@
       "role_paths": [
         "roles/"
       ],
-      "extra_arguments": ["--skip-tags \"nginx,supervisor\""]
+      "extra_arguments": ["--skip-tags \"nginx,supervisor\"", "-vvvv"]
     }
   ],
   "post-processors": [{
