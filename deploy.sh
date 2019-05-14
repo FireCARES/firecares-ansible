@@ -127,7 +127,7 @@ packBeatAMI() {
 
   if [ "$(echo $EXISTING_BEATAMI | wc -w)" -lt 10 ]; then
     echo "AMI for celerybeat-${DEPLOY_ENV}-${HASH} not found...creating"
-    $PACKER build -machine-readable -color=false -var "commit=${HASH}" packer/celerybeat/celerybeat-${DEPLOY_ENV}-packer.json | tee $TMP/beatpackerlog.txt
+    $PACKER build -on-error=abort -machine-readable -color=false -var "commit=${HASH}" packer/celerybeat/celerybeat-${DEPLOY_ENV}-packer.json | tee $TMP/beatpackerlog.txt
     cat $TMP/beatpackerlog.txt | egrep 'artifact,0,id' | rev | cut -f1 -d: | rev > $TMP/beatcurrent_ami.txt
     # Check ami length, if 0 then abort
     if [ $(wc -c < "$TMP/beatcurrent_ami.txt") -eq 0 ]; then
