@@ -56,7 +56,6 @@
       - { name: 'lme4', version: '1.1-21' }
       - { name: 'magrittr', version: '1.5' }
       - { name: 'roxygen2', version: '6.1.1' }
-      - { name: 'plyr', version: '1.8.4' }
       - { name: 'httr', version: '1.4.0' }
       - { name: 'acs', version: '1.4.0' }
   become: yes
