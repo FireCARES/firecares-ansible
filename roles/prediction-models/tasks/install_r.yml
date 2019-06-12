@@ -2,6 +2,7 @@
 - name: Install base packages
   apt: name={{ item }} update_cache={{ update_apt_cache }} force=yes state=installed
   with_items:
+    - libcurl4-openssl-dev
     - libssh2-1-dev
     - libgit2-dev
     - libgit2-24
@@ -30,6 +31,9 @@
 
 - name: Install R-base
   apt: name="r-base-dev" update_cache=yes
+
+- name: Install RScript
+  apt: name="r-base-core" update_cache=yes
 
 - name: Install RScript
   apt: name="r-cran-littler" update_cache=yes
