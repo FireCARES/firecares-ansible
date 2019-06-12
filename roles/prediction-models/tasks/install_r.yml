@@ -13,8 +13,6 @@
     - libxslt-dev
     - zlib1g-dev
     - build-essential
-    - r-cran-openssl
-    - r-cran-xml2
   tags: packages
 
 - name: Add CRAN apt repo
