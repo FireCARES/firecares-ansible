@@ -13,7 +13,6 @@
     - libxslt-dev
     - zlib1g-dev
     - build-essential
-    - r-cran-curl
     - r-cran-openssl
     - r-cran-xml2
   tags: packages
@@ -30,6 +29,9 @@
 
 - name: Install R-base
   apt: name="r-base" update_cache=yes
+
+- name: Install R-base
+  apt: name="r-base-dev" update_cache=yes
 
 - name: Install RScript
   apt: name="r-cran-littler" update_cache=yes
