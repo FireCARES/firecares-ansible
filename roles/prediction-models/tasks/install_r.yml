@@ -66,6 +66,7 @@
       - { name: 'roxygen2', version: '6.1.1' }
       - { name: 'httr', version: '1.4.0' }
       - { name: 'acs', version: '1.4.0' }
+      - { name: 'ranger', version: '1.4.0' }
   become: yes
 
 - name: Install Census API key
