@@ -2,6 +2,8 @@
 
 - name: Build pkgFireCARES
   command: >
+    wget https://cran.r-project.org/src/contrib/ranger_0.11.2.tar.gz
+    R CMD INSTALL -l ranger_0.11.2.tar.gz
     R CMD INSTALL .
   args:
     chdir: "{{ virtualenv_path }}/src/fire-risk/r_code/pkgFireCARES"
