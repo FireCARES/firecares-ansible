@@ -2,7 +2,7 @@
 
 - name: Build pkgFireCARES
   command: >
-    wget https://cran.r-project.org/src/contrib/ranger_0.11.2.tar.gz
+    wget 'https://cran.r-project.org/src/contrib/ranger_0.11.2.tar.gz'
     R CMD INSTALL -l ranger_0.11.2.tar.gz
     R CMD INSTALL .
   args:
