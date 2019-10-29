@@ -27,6 +27,4 @@
     - rabbitmq
     - web
     - celery
-    - filebeat
-    - metricbeat
-    - prediction-models
+#    - prediction-models

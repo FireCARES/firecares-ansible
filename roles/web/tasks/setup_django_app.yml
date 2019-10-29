@@ -1,5 +1,9 @@
 ---
 
+# We _need_ switch over to pipenv vs pip/requirements.txt
+- name: Install numpy==1.10.4
+  pip: virtualenv={{ virtualenv_path }} name=numpy==1.10.4
+
 - name: Install packages required by the Django app inside virtualenv
   pip: virtualenv={{ virtualenv_path }} requirements={{ requirements_file }}
 

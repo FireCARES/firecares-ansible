@@ -33,6 +33,7 @@
     - libproj-dev
     - gdal-bin
     - python-gdal
+    - python-pip
     - libpng-dev
     - libfreetype6-dev
     - pkg-config
@@ -47,7 +48,6 @@
     - libffi-dev
     - libssh2-1-dev
     - libgit2-dev
-    - libgit2-24
     - postgis
   tags: packages
 

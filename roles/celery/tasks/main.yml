@@ -18,6 +18,9 @@
     - celery
     - deploy
 
+- name: Install setuptools==41
+  pip: name=setuptools==41
+
 - name: Install python packages for celery
   pip: name={{item}}
   tags: packages
@@ -25,6 +28,5 @@
     - sh
     - PyOpenSSL
     - cryptography
-    - pyopenssl
     - ndg-httpsclient
     - pyasn1
