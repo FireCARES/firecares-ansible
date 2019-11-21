@@ -15,3 +15,6 @@ node_modules/
 .cache
 __pycache__
 .python-version
+.venv
+.ipynb_checkpoints
+.vscode

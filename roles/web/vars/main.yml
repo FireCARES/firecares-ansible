@@ -68,3 +68,5 @@ django_environment:
   HELIX_SECRET: "{{ helix_secret|default(omit) }}"
   COMPRESS_URL: "{{ compress_url|default(omit) }}"
   OSGEO_STORAGE_BUCKET_NAME: "{{ document_upload_bucket }}"
+  GOOGLE_API_KEY: "{{ google_api_key|default(omit) }}"
+  GOOGLE_MAP_API_KEY: "{{ google_map_api_key|default(omit) }}"
