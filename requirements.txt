@@ -1,4 +1,4 @@
-ansible==2.8.6
+ansible==4.2.0
 boto==2.45.0
 click==6.7
 tabulate==0.7.5
