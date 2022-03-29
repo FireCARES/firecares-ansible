@@ -5,6 +5,6 @@ tabulate==0.7.5
 troposphere==1.9.2
 sh==1.12.14
 testinfra==1.6.5
-paramiko==2.6.0
+paramiko==2.10.1
 pytz
 python-dateutil
